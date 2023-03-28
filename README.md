@@ -1,0 +1,1 @@
+# charika_platform
