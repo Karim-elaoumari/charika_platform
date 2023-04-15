@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import Dashboard  from "./pages/dashboard.vue";
 import New_company from "./pages/company/new_company.vue";
+import All_companies from "./pages/company/all_companies.vue";
 const currentComponent = ref(Dashboard);
 const wrapper = ref("");
 const toggle = () => {
@@ -17,7 +18,7 @@ const toggle = () => {
 
 <div id="page-content-wrapper" class="box">
 <nav class="navbar navbar-expand-lg navbar-light bg-transparent p-3  justify-content-between" id="">
-                    <i class="bi bi-list mycolor fs-3" @click="toggle" w></i>
+                    <i class="bi bi-list mycolor fs-3" @click="toggle" style="cursor: pointer;"></i>
             <div class="d-flex align-items-center ms-auto">
                 <div class="pt-3 me-3">
                   <p class="fs-6 text-white">Today : {{ `${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}` }}</p>
@@ -38,7 +39,7 @@ const toggle = () => {
                         </a>
                         <ul class="dropdown-menu" style="cursor: pointer;">
                             <li><a class="dropdown-item" @click="currentComponent = New_company">New Company</a></li>
-                            <li><a class="dropdown-item" >All Companies</a></li>
+                            <li><a class="dropdown-item" @click="currentComponent = All_companies">All Companies</a></li>
                             <li><a class="dropdown-item">My Companies</a></li>
                         </ul>
                 </li>

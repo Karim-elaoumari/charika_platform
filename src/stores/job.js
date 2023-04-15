@@ -11,11 +11,11 @@ export const useJobStore = defineStore("jobs", {
     },
     actions: {
         async fetchJobs(){
-            try {
+            try{
                 await axios.get('/jobs').then(response => {
                   this.jobs = response.data.data[0];
                 });
-              } catch (error) {
+              } catch (error){
                 console.error(error);
               }
         },
