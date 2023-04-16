@@ -1,8 +1,12 @@
 <script setup>
-import { ref } from "vue";
+import { ref,onBeforeMount } from "vue";
+import Footer from "../Home/footer.vue";
+import Loader from "../composants/loader.vue";
+import { useAuthStore } from "../../stores/auth";
 import Dashboard  from "./pages/dashboard.vue";
 import New_company from "./pages/company/new_company.vue";
 import All_companies from "./pages/company/all_companies.vue";
+import My_companies from "./pages/company/my_companies.vue";
 const currentComponent = ref(Dashboard);
 const wrapper = ref("");
 const toggle = () => {
@@ -12,13 +16,17 @@ const toggle = () => {
         wrapper.value = "toggled";
     }
 };
+onBeforeMount(async ()=>{
+  if(useAuthStore().getUser==false){
+    await useAuthStore().checkAuth();
+  }
+});
 </script>
 <template>
-
-
+<Loader :loaderName="'main'"></Loader>
 <div id="page-content-wrapper" class="box">
 <nav class="navbar navbar-expand-lg navbar-light bg-transparent p-3  justify-content-between" id="">
-                    <i class="bi bi-list mycolor fs-3" @click="toggle" style="cursor: pointer;"></i>
+            <i class="bi bi-list mycolor fs-3" @click="toggle" style="cursor: pointer;"></i>
             <div class="d-flex align-items-center ms-auto">
                 <div class="pt-3 me-3">
                   <p class="fs-6 text-white">Today : {{ `${new Date().getDate()}-${new Date().getMonth() + 1}-${new Date().getFullYear()}` }}</p>
@@ -40,7 +48,7 @@ const toggle = () => {
                         <ul class="dropdown-menu" style="cursor: pointer;">
                             <li><a class="dropdown-item" @click="currentComponent = New_company">New Company</a></li>
                             <li><a class="dropdown-item" @click="currentComponent = All_companies">All Companies</a></li>
-                            <li><a class="dropdown-item">My Companies</a></li>
+                            <li><a class="dropdown-item" @click="currentComponent = My_companies">My Companies</a></li>
                         </ul>
                 </li>
                 <li class="nav-item dropdown" style="list-style: none;margin-left: 10px;">
@@ -56,6 +64,7 @@ const toggle = () => {
  </div>
  <div class="container">
     <component :is="currentComponent"></component>
+    <Footer></Footer>
 
  </div>
 </div>
@@ -127,10 +136,6 @@ const toggle = () => {
     }
   }
 
-  @media (min-width: 1200px) {
-    .appointment-table{
-      width: 100%;
-    }
-  }
+
 
 </style>

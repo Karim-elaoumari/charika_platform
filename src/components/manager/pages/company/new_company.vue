@@ -121,8 +121,6 @@ onBeforeMount(async()=>{
             </select>
             <label for="job">City</label>
         </div>
-
-        
     </div>
   </div>
 

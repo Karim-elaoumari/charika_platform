@@ -10,8 +10,6 @@ const routes = [
     },
     {
         path : "/login",
-        
-
         name:"login",
         component: ()=> import('../components/Authentication/Login.vue') ,
     },
@@ -41,7 +39,7 @@ const routes = [
         component: ()=> import('../components/Home/reviews.vue') ,
     },
     {
-        path : "/company",
+        path : "/company/:name",
         name:"company",
         component: ()=> import('../components/Home/company.vue') ,
     },
@@ -56,11 +54,24 @@ const routes = [
         component: ()=> import('../components/Authentication/verify-email.vue') ,
     },
     {
+        // beforeEnter: async (to, from, next) => {
+        //     if(useAuthStore().getUser==null){
+        //         await useAuthStore().checkAuth();
+        //     }
+        //     next();
+        // },
         path : "/profile",
         name:"profile",
+
         component: ()=> import('../components/Home/profile.vue') ,
     },
     {
+        beforeEnter: async (to, from, next) => {
+            if(useAuthStore().getUser==null){
+                await useAuthStore().checkAuth();
+            }
+            next();
+        },
         path : "/manager",
         name:"manager",
         component: ()=> import('../components/manager/dash.vue'),

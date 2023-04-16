@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps,ref } from "vue";
+import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useLoaderStore } from "../../../src/stores/loader";
 const {loaderName} = defineProps(['loaderName']);

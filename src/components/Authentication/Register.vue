@@ -5,7 +5,7 @@
 
 import {ref, onBeforeMount,computed} from "vue";
 
-
+import Footer from "../Home/footer.vue";
 import {useRouter} from 'vue-router'
 import { useAuthStore } from "../../stores/auth";
 import { useAlertStore } from "../../stores/alert";
@@ -65,14 +65,13 @@ const handleRegister =() =>{
       <div class="row gx-lg-5 align-items-center">
         <div class="col-lg-6 mb-5 mb-lg-0">
           <h1 class="my-5 display-3 fw-bold ls-tight">
-            The best offer <br />
-            <span class="text-primary">for your business</span>
+            The best Choice  <br />
+            <span class="text-primary">for your Creer</span>
           </h1>
           <p style="color: hsl(217, 10%, 50.8%)">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit.
-            Eveniet, itaque accusantium odio, soluta, corrupti aliquam
-            quibusdam tempora at cupiditate quis eum maiores libero
-            veritatis? Dicta facilis sint aliquid ipsum atque?
+            Unlock the power of customer feedback to find the best companies
+            Expert analysis and unbiased reviews to help you choose the right company
+            Make engagement and feedback companies easier
           </p>
         </div>
 
@@ -156,6 +155,7 @@ const handleRegister =() =>{
   </div>
 
 </section>
+<Footer></Footer>
 
 </template>
 

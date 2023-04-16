@@ -45,7 +45,6 @@ const handleInfo = ()=> {
 }
 const switchSelect = (event)=>{
       form.value.job_id = event.target.value;
-      console.log(form.value.job_id);
 }
 </script>
 <template>

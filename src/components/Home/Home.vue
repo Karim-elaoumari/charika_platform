@@ -4,6 +4,7 @@
 import {ref,onBeforeMount} from "vue";
 import Alert from "../composants/alert.vue";
 import Loader from "../composants/loader.vue";
+import Footer from "./footer.vue";
 </script>
 <template>
    <Loader :loaderName="'main'"></Loader>
@@ -310,25 +311,8 @@ Stay ahead of the competition with our in-depth reviews and ratings, and experie
 </section>
 
 </main>
+<Footer></Footer>
 
-
-<footer  class="footer">
-
-
-
-
-<div class="container">
-  <div class="copyright">
-    &copy; Copyright <strong><span>Charika</span></strong>. All Rights Reserved
-  </div>
-  <div class="credits">
-   
-    Designed by <a href="">Karim El Aoumari</a>
-  </div>
-</div>
-</footer><!-- End Footer -->
-
-<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 </template>
 <style>

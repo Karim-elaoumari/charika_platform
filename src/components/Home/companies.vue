@@ -1,50 +1,85 @@
 <script setup>
+import Footer from "./footer.vue";
+import { useCompanyStore } from "../../stores/company";
+import { Country, City}  from 'country-state-city';
+import { ref, onBeforeMount, computed } from "vue";
+import Loader from "../composants/loader.vue";
+import {useRouter} from 'vue-router'
+const router = useRouter();
+const companyStore = useCompanyStore();
+const companies = ref([]);
+onBeforeMount(async() => {
+  if(!companyStore.companies.length!=0){
+    await companyStore.fetchCompanies();
+    companies.value.push(...companyStore.companies);
+  }
+});
+const search = ref('');
+
+const current_page = ref(1);
+const handle_page = (page)=>{
+  if(page < 1 || page > Math.ceil(companies.value.length/4)) return;
+  current_page.value = page;
+}
+const handle_search = ()=>{
+  if(search.value == ''){
+    companies.value = companyStore.companies;
+  }else{
+    companies.value = companies.value.filter(company=>company.name.toLowerCase().includes(search.value.toLowerCase()));
+  }
+   
+}
+const items = computed(()=>{
+  return companies.value.slice((current_page.value-1)*4,current_page.value*4);
+});
+
+const selectedCompany = (company)=>{
+  
+  company.name = company.name.replace(/\s+/g, '-');
+  router.push({name:'company',params:{name:company.name}});
+}
 </script>
 <template>
-
 <main id="main">
-
-
 <section class="breadcrumbs">
   <div class="container">
-
     <h2>Companies</h2>
-
   </div>
 </section>
-
-
 <section  class="blog">
-  <div class="container" data-aos="fade-up">
+  <div class="container">
 
     <div class="row">
-
       <div class="col-lg-8 entries">
         <h5 class="text-primary">Search</h5>
-        <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-primary" type="submit">Search</button>
-        </form><br>
-        <article class="entry">
+        <div class="d-flex" role="search">
+        <input class="form-control me-2" type="search" placeholder="Search by company name ..." aria-label="Search" v-model="search">
+        <button class="btn btn-outline-primary" @click="handle_search">Search</button>
+        </div><br>
+        <Loader :loaderName="'wait_company'"></Loader>
+        <article class="entry mt-3" v-for="company in items" style="cursor: pointer;" @click="selectedCompany(company)">
             <div id="comment-3" class="comment">
             <div class="d-flex">
-              <div class="comment-img"><img src="https://m.media-amazon.com/images/G/01/gc/designs/livepreview/a_generic_white_10_us_noto_email_v2016_us-main._CB627448186_.png" style="max-width: 100px;height: 90px;" alt=""></div>
+              <div class="comment-img"><img :src="company.logo" style="max-width: 100px;height: 90px;" alt=""></div>
               <div style="padding-left: 7px;">
-                <h5><a href="">Amazon</a> </h5>
+                <h4 style="color: #4154f1;">{{ company.name }} </h4>
+                <p class="text-muted mb-0">{{ company.industry.name }}</p>
                 <p>
-                  <b class="text-bold">Description:</b> nesciunt rerum reprehenderit sed. Iste omnis eius repellendus quia nihil ut accusantium tempore. Nesciunt expedita id dolor exercitationem aspernatur aut quam ut. Voluptatem est accusamus iste at.
-                 
+                  {{company.description.slice(0, 30) + '...'}}
                 </p>
               </div>
             </div>
           </div>
           <div class="entry-meta">
             <ul>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Employees:123</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Industry: It consulting</time></a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="blog-single.html">Reviews:1231</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Rate: 2.5/5</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Location: Parie</time></a></li>
+              <li class=""><i class="bi bi-person"></i> <a href="">Employees: {{ company.employees }}</a></li>
+              <li class=""><i class="bi bi-chat-dots"></i> <a href="">Reviews: {{ company.reviews_count }}</a></li>
+              <li class="d-flex align-items-center"><i class="bi bi-emoji-smile"></i> <a href="">Rate:  <i class="bi bi-star-fill " :style=" {color: company.stars>0 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>1 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>2 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>3 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>4 ? '#fbc634' : ''}" style="font-size:small;"></i></a></li>
+              <li class=""><i class="bi bi-houses"></i> <a href="">Location: {{ Country.getCountryByCode(company.country_code).name+" "+company.city }}</a></li>
             </ul>
           </div>
         </article>
@@ -53,13 +88,21 @@
         
         
 
-        <div class="blog-pagination">
-          <ul class="justify-content-center">
-            <li><a href="#">1</a></li>
-            <li class="active"><a href="#">2</a></li>
-            <li><a href="#">3</a></li>
-          </ul>
-        </div>
+        <ul class="pagination  justify-content-center mt-3">
+            <li class="page-item">
+              <a class="page-link" href="#" aria-label="Previous" @click="handle_page(current_page-1)">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li class="page-item"><a class="page-link active" @click="handle_page(current_page)">{{ current_page }}</a></li>
+            <li class="page-item"><a class="page-link" @click="handle_page(current_page+1)">{{ current_page+1 }}</a></li>
+            <li class="page-item"><a class="page-link" @click="handle_page(current_page+2)">{{ current_page+2 }}</a></li>
+            <li class="page-item">
+              <a class="page-link" href="#" aria-label="Next" @click="handle_page(current_page+1)">
+                <span aria-hidden="true" >&raquo;</span>
+              </a>
+            </li>
+        </ul>
 
       </div>
 
@@ -85,19 +128,19 @@
           <div class="sidebar-item recent-posts">
             <div class="post-item clearfix">
               <img src="../../assets/img/blog/blog-recent-1.jpg" alt="">
-              <h4><a href="blog-single.html">Nihil blanditiis at in nihil autem</a></h4>
+              <h4><a href="">Nihil blanditiis at in nihil autem</a></h4>
               <time datetime="2020-01-01">Jan 1, 2020</time>
             </div>
 
             <div class="post-item clearfix">
               <img src="../../assets/img/blog/blog-recent-2.jpg" alt="">
-              <h4><a href="blog-single.html">Quidem autem et impedit</a></h4>
+              <h4><a href="">Quidem autem et impedit</a></h4>
               <time datetime="2020-01-01">Jan 1, 2020</time>
             </div>
 
             <div class="post-item clearfix">
               <img src="../../assets/img/blog/blog-recent-3.jpg" alt="">
-              <h4><a href="blog-single.html">Id quia et et ut maxime similique occaecati ut</a></h4>
+              <h4><a href="">Id quia et et ut maxime similique occaecati ut</a></h4>
               <time datetime="2020-01-01">Jan 1, 2020</time>
             </div>
 
@@ -109,7 +152,7 @@
 
             <div class="post-item clearfix">
               <img src="../../assets/img/blog/blog-recent-5.jpg" alt="">
-              <h4><a href="blog-single.html">Et dolores corrupti quae illo quod dolor</a></h4>
+              <h4><a href="">Et dolores corrupti quae illo quod dolor</a></h4>
               <time datetime="2020-01-01">Jan 1, 2020</time>
             </div>
 
@@ -143,92 +186,7 @@
 
 </main>
 
-
-<footer id="footer" class="footer">
-
-<div class="footer-newsletter">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-12 text-center">
-        <h4>Our Newsletter</h4>
-        <p>Tamen quem nulla quae legam multos aute sint culpa legam noster magna</p>
-      </div>
-      <div class="col-lg-6">
-        <form action="" method="post">
-          <input type="email" name="email"><input type="submit" value="Subscribe">
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="footer-top">
-  <div class="container">
-    <div class="row gy-4">
-      <div class="col-lg-5 col-md-12 footer-info">
-        <a href="index.html" class="logo d-flex align-items-center">
-          <img src="../../assets/img/logo.png" alt="">
-          <span>FlexStart</span>
-        </a>
-        <p>Cras fermentum odio eu feugiat lide par naso tierra. Justo eget nada terra videa magna derita valies darta donna mare fermentum iaculis eu non diam phasellus.</p>
-        <div class="social-links mt-3">
-          <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-          <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-          <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-          <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-        </div>
-      </div>
-
-      <div class="col-lg-2 col-6 footer-links">
-        <h4>Useful Links</h4>
-        <ul>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">Home</a></li>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">About us</a></li>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">Services</a></li>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">Terms of service</a></li>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">Privacy policy</a></li>
-        </ul>
-      </div>
-
-      <div class="col-lg-2 col-6 footer-links">
-        <h4>Our Services</h4>
-        <ul>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">Web Design</a></li>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">Web Development</a></li>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">Product Management</a></li>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">Marketing</a></li>
-          <li><i class="bi bi-chevron-right"></i> <a href="#">Graphic Design</a></li>
-        </ul>
-      </div>
-
-      <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
-        <h4>Contact Us</h4>
-        <p>
-          A108 Adam Street <br>
-          New York, NY 535022<br>
-          United States <br><br>
-          <strong>Phone:</strong> +1 5589 55488 55<br>
-          <strong>Email:</strong> info@example.com<br>
-        </p>
-
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<div class="container">
-  <div class="copyright">
-    &copy; Copyright <strong><span>FlexStart</span></strong>. All Rights Reserved
-  </div>
-  <div class="credits">
-   
-    Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-  </div>
-</div>
-</footer>
-
-<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<Footer></Footer>
 
 
 </template>

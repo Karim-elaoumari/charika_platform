@@ -1,120 +1,272 @@
 <script setup>
+import { Country, City}  from 'country-state-city';
+import { ref, onBeforeMount, computed } from "vue";
+import { useIndustyStore} from "../../../../stores/industry";
+import { useAuthStore } from "../../../../stores/auth";
+import { useAlertStore } from '../../../../stores/alert';
+import { useCompanyStore } from "../../../../stores/company";
+import Alert from "../../../composants/alert.vue"
+import Loader from "../../../composants/loader.vue";
+const alertStore = useAlertStore();
+const IndustryStore = useIndustyStore();
+const companyStore = useCompanyStore();
+onBeforeMount(async() => {
+  if(IndustryStore.getIndustries.length == 0){
+     await IndustryStore.fetchIndustries();
+  }
+  if(!companyStore.companies.length!=0){
+     await companyStore.fetchCompanies();
+  }
+  
+});
+
+const form_company  = ref({
+    'id' : '',
+    'name':'',
+    'logo_url':'',
+    'website': '',
+    'country' : '',
+    'city' : '',
+    'address' : '',
+    'industry' : '',
+    'foundation_year' : '',
+    'employees' : '',
+    'revenue' : '',
+    'description' : '',
+    'mission' : '',
+});
+const assignCompany= (company)=>{
+    form_company.value.id = company.id
+    form_company.value.name = company.name;
+    form_company.value.logo_url = company.logo;
+    form_company.value.website = company.website;
+    form_company.value.country = company.country_code;
+    form_company.value.city = company.city;
+    form_company.value.address = company.address;
+    form_company.value.industry = company.industry.id;
+    form_company.value.foundation_year = company.founded;
+    form_company.value.employees = company.employees;
+    form_company.value.revenue = company.revenue;
+    form_company.value.description = company.description;
+    form_company.value.mission = company.mission;
+}
+const handle_company = ()=>{
+    if(form_company.value.name == '' || form_company.value.logo_url == ''  || form_company.value.country == '' || form_company.value.city == ''|| form_company.value.address == '' || form_company.value.industry == '' ||  form_company.value.employees == ''  || form_company.value.description == '' || form_company.value.mission == ''){
+        alertStore.setAlert('alert-danger','Please fill all the fields');
+        return;
+    }
+    else if(!form_company.value.logo_url.match(/^(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)$/)){
+        alertStore.setAlert('alert-danger','Please enter a valid logo url');
+        return;
+    }
+    else if(!form_company.value.website.match(/^(http(s?):)([/|.|\w|\s|-])*\.(?:com|net|org|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)$/)){
+        alertStore.setAlert('alert-danger','Please enter a valid website url');
+        return;
+    }
+    else if(form_company.value.foundation_year < 1900 || form_company.value.foundation_year > 2021){
+        alertStore.setAlert('alert-danger','Please enter a valid foundation year');
+        return;
+    }
+    else if(form_company.value.employees < 1){
+        alertStore.setAlert('alert-danger','Please enter a valid number of employees');
+        return;
+    }
+    else if(form_company.value.revenue <1){
+        alertStore.setAlert('alert-danger','Please enter a valid revenue');
+        return;
+    }
+    else if(form_company.value.description.length < 100){
+        alertStore.setAlert('alert-danger','Description must be at least 50 characters');
+        return;
+    }
+    else if(form_company.value.mission.length < 50){
+        alertStore.setAlert('alert-danger','Mission must be at least 20 characters');
+        return;
+    }
+    else{
+        if(form_company.revenue==''){
+            form_company.revenue=100;
+        }
+        console.log(form_company.value.id);
+        useCompanyStore().updateCompany(form_company.value.id,form_company.value.name,form_company.value.logo_url,form_company.value.website,form_company.value.country,form_company.value.city,form_company.value.address,form_company.value.industry,form_company.value.foundation_year,form_company.value.employees,form_company.value.revenue,form_company.value.description,form_company.value.mission);
+    }
+}
 </script>
 
 <template>
-        <div class=" table-responsive mt-2">
+<div class="card mt-2" style="min-height: 80vh;">
+<div class="card-body  px-md-5">
+<div class=" table-responsive mt-2">
+    <Loader :loaderName="'wait_company'"></Loader>
+    <Loader :loaderName="'wait_industrie'"></Loader>
     <table class="table align-middle mb-0 bg-white" style="border: 1px solid blue;">
   <thead class="bg-light">
     <tr>
-      <th>Name</th>
-      <th>Title</th>
-      <th>Status</th>
-      <th>Position</th>
-      <th>Actions</th>
+      <th>company</th>
+      <th>Location</th>
+      <th>Employees</th>
+      <th>Reviews</th>
+      <th>Stars</th>
+      <th>Revenu USD</th>
+      <th>Action</th>
     </tr>
   </thead>
   <tbody>
-    <tr>
+    <tr v-for="company in companyStore.companies.filter(company => company.manager.id ==useAuthStore().getUser.id)">
       <td>
         <div class="d-flex align-items-center">
           <img
-              src="https://mdbootstrap.com/img/new/avatars/8.jpg"
+              :src="company.logo"
               alt=""
-              style="width: 45px; height: 45px"
-              class="rounded-circle"
+              style="width: 45px; height: 45px;border-radius: 10%;"
+              
               />
           <div class="ms-3">
-            <p class="fw-bold mb-1">John Doe</p>
-            <p class="text-muted mb-0">john.doe@gmail.com</p>
+            <p class="fw-bold mb-1">{{ company.name }}</p>
+            <p class="text-muted mb-0">{{ company.industry.name }}</p>
           </div>
         </div>
       </td>
       <td>
-        <p class="fw-normal mb-1">Software engineer</p>
-        <p class="text-muted mb-0">IT department</p>
+        <p class="fw-normal mb-1">{{ Country.getCountryByCode(company.country_code).name }}</p>
+        <p class="text-muted mb-0">{{ company.city }}</p>
       </td>
-      <td>
-        <span class="badge badge-success rounded-pill d-inline">Active</span>
+      <td>{{ company.employees }}</td>
+      <td>{{ company.reviews_count }}</td>
+      <td style="min-width: 100px;">
+            <i class="bi bi-star-fill " :style=" {color: company.stars>0 ? '#fbc634' : ''}" style="font-size:small;" ></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>1 ? '#fbc634' : ''}" style="font-size:small;" ></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>2 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>3 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>4 ? '#fbc634' : ''}" style="font-size:small;"></i>
       </td>
-      <td>Senior</td>
+      <td>{{ company.revenue }}</td>
       <td>
-        <button type="button" class="btn btn-link btn-sm btn-rounded">
+        <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn  btn-outline-primary btn-sm btn-rounded" @click="assignCompany(company)">
           Edit
+        </button>
+        <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn  btn-outline-danger btn-sm btn-rounded ms-2" @click="assignCompany(company)">
+          delete
         </button>
       </td>
     </tr>
-    <tr>
-      <td>
-        <div class="d-flex align-items-center">
-          <img
-              src="https://mdbootstrap.com/img/new/avatars/6.jpg"
-              class="rounded-circle"
-              alt=""
-              style="width: 45px; height: 45px"
-              />
-          <div class="ms-3">
-            <p class="fw-bold mb-1">Alex Ray</p>
-            <p class="text-muted mb-0">alex.ray@gmail.com</p>
-          </div>
-        </div>
-      </td>
-      <td>
-        <p class="fw-normal mb-1">Consultant</p>
-        <p class="text-muted mb-0">Finance</p>
-      </td>
-      <td>
-        <span class="badge badge-primary rounded-pill d-inline"
-              >Onboarding</span
-          >
-      </td>
-      <td>Junior</td>
-      <td>
-        <button
-                type="button"
-                class="btn btn-link btn-rounded btn-sm fw-bold"
-                data-mdb-ripple-color="dark"
-                >
-          Edit
-        </button>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div class="d-flex align-items-center">
-          <img
-              src="https://mdbootstrap.com/img/new/avatars/7.jpg"
-              class="rounded-circle"
-              alt=""
-              style="width: 45px; height: 45px"
-              />
-          <div class="ms-3">
-            <p class="fw-bold mb-1">Kate Hunington</p>
-            <p class="text-muted mb-0">kate.hunington@gmail.com</p>
-          </div>
-        </div>
-      </td>
-      <td>
-        <p class="fw-normal mb-1">Designer</p>
-        <p class="text-muted mb-0">UI/UX</p>
-      </td>
-      <td>
-        <span class="badge badge-warning rounded-pill d-inline">Awaiting</span>
-      </td>
-      <td>Senior</td>
-      <td>
-        <button
-                type="button"
-                class="btn btn-link btn-rounded btn-sm fw-bold"
-                data-mdb-ripple-color="dark"
-                >
-          Edit
-        </button>
-      </td>
-    </tr>
+   
   </tbody>
 </table>
            </div>
-    
+</div>
+</div>
+<div class="modal fade" v-if="form_company" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Company information</h1>
+        <Alert></Alert>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body blog entries">
+        <Loader :loaderName="'update_company'"></Loader>
+        <form @submit.prevent="handle_company">
+            <div class="row mb-2">
+                <div class="col">
+                <div class="form-outline">
+                    <input type="text"  class="form-control"  v-model="form_company.name"/>
+                    <label class="form-label" for="form6Example1">Name</label>
+                </div>
+                </div>
+                <div class="col">
+                <div class="form-outline">
+                    <input type="text"  class="form-control"  v-model="form_company.logo_url"/>
+                    <label class="form-label" for="form6Example2">Logo Url</label>
+                </div>
+                </div>
+            </div>
+  
+  
+            <div class="form-outline mb-2">
+                <input type="text" id="form6Example3" class="form-control" v-model="form_company.website"/>
+                <label class="form-label" for="form6Example3">Website</label>
+            </div>
+            <div class="row mb-2">
+                <div class="col">
+                    <div class="form-outline mb-2">
+                        <select class="form-control"   v-model="form_company.country">
+                            <option value="">--Select--</option>
+                            <option  v-for="country in Country.getAllCountries()" :value="country.isoCode" :selected="country.isoCode==form_company.country">{{ country.name }}</option>
+                        </select>
+                        <label for="job">Country</label>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-outline mb-2">
+                        <select class="form-control"  v-model="form_company.city">
+                            <option value="">--Select--</option>
+                            <option  :value="city.name" v-for="city in City.getCitiesOfCountry(form_company.country)" :selected="city.name==form_company.city">{{ city.name }}</option>
+                        </select>
+                        <label for="job">City</label>
+                </div>
+
+        
+            </div>
+        </div>
+
+
+
+        <div class="form-outline mb-2">
+                    <input type="text"  class="form-control" v-model="form_company.address" />
+                    <label class="form-label" for="form6Example5">Address</label>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <div class="form-outline mb-2">
+                    <select  class="form-select" v-model="form_company.industry">
+                                    <option value="">--Select--</option>
+                                    <option v-for="industry in IndustryStore.getIndustries" :value="industry.id" >{{ industry.name }}</option>
+                    </select>
+                    <label>Industry</label>
+                </div>
+            </div>
+            <div class="col">
+            <div class="form-outline">
+                <div class="form-outline mb-2">
+                    <input type="number" min="1900" max="2099" step="1" placeholder="YYYY"  class="form-control" v-model="form_company.foundation_year"/>
+                    <label class="form-label" >Foundation Year</label>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <div class="form-outline mb-2">
+                    <input type="number"  class="form-control" v-model="form_company.employees"/>
+                    <label class="form-label" for="form6Example3">Employees</label>
+                </div>
+            </div>
+            <div class="col">
+            <div class="form-outline">
+                <div class="form-outline mb-2">
+                    <input type="number"  class="form-control"  step="0.1" v-model="form_company.revenue"/>
+                    <label class="form-label" for="form6Example3">Revenue (USD)</label>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="form-outline mb-2">
+            <textarea class="form-control" id="form6Example7" rows="4" v-model="form_company.description"></textarea>
+            <label class="form-label" for="form6Example7">Description</label>
+        </div>
+        <div class="form-outline mb-2">
+            <textarea class="form-control" id="form6Example7" rows="4" v-model="form_company.mission"></textarea>
+            <label class="form-label" for="form6Example7">Mission</label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-block mb-4">update</button>
+        </form>
+       
+      </div>
+    </div>
+  </div>
+</div>
 </template>
 <style>
 </style>

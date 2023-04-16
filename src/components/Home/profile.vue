@@ -1,19 +1,17 @@
 <script setup>
 import { ref,onBeforeMount } from "vue"
+import {useRouter} from 'vue-router'
 import { useAuthStore } from "../../stores/auth";
 import Loader from "../composants/loader.vue";
 import Edit_info from "./profile_components/edit_info.vue"
+import Footer from "./footer.vue";
 import Edit_password_email from "./profile_components/edit_password_email.vue"
-
-const wait = ref(true);
 onBeforeMount(async ()=>{
-  if(useAuthStore().getUser==false){
+  if(useAuthStore().getUser==null){
     await useAuthStore().checkAuth();
   }
-  wait.value = false;
 });
 const currentComponent = ref(Edit_info);
-
 </script>
 <template>
     <Loader :loaderName="'main'"></Loader>
@@ -56,6 +54,7 @@ const currentComponent = ref(Edit_info);
             </div>
         </div>
   </section>
+  <Footer></Footer>
 </template>
 <style scoped>
 </style>

@@ -10,7 +10,7 @@ export const useAuthStore = defineStore("auth", {
       router : useRouter()
     }),
     getters: {
-      getUser: (state) => state.user
+      getUser: (state) => state.user,
     },
     actions: {
         async login(email, password){
@@ -55,6 +55,7 @@ export const useAuthStore = defineStore("auth", {
             try {
                 await axios.post('/logout',null,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
                   this.user = null;
+                  Cookies.remove('token');
                   useAlertStore().setAlert("alert-warning","Loged out successfully");
                   this.router.push({name:'home'});
                 });
@@ -63,19 +64,30 @@ export const useAuthStore = defineStore("auth", {
                 return false;
               }
         },
-      async checkAuth(){
+      async checkAuth(action='null'){
+
         useLoaderStore().showLoader({name:"main",visibility:false,type:'all'});
-        try{
-          await axios.get('/auth_test',{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
-            useLoaderStore().hideLoader('main');
-            this.user = response.data.user;
-          });
-        } catch (error){
-          if(error.response.status==401){
-            this.router.push({name:'login'});
+          try{
+            await axios.get('/auth_test',{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+              useLoaderStore().hideLoader('main');
+              this.user = response.data.user;
+            
+            });
+          } catch (error){
+            if(error.response.status==401){
+              this.user = null;
+             
+              if(action=='No_redirect'){
+                useLoaderStore().hideLoader('main');
+              }else{
+              this.router.push({name:'login'});
+              useLoaderStore().hideLoader('main');
+              }
           }
         }
+        
       },
+
       async verifyEmail(email, code){
         useLoaderStore().showLoader({name:"verify-Email",visibility:true});
          await axios.post('/verify-email', {email, code})
@@ -85,7 +97,7 @@ export const useAuthStore = defineStore("auth", {
           setTimeout(() =>{
             this.router.push({name:'login'});
           }, 400)
-         }).catch(error => {
+         }).catch(error =>{
              useLoaderStore().hideLoader('verify-Email');
              if(error.response.status==422){
                   useAlertStore().setAlert("alert-danger","Email or Code is incorrect");
@@ -152,10 +164,13 @@ export const useAuthStore = defineStore("auth", {
       try {
           await axios.get('/user',{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
             this.user = response.data.data;
+           
             useLoaderStore().hideLoader('main');
           });
         } catch (error) {
           if(error.response.status==401){
+            this.user = null;
+           
             useLoaderStore().hideLoader('main');
           }
         }

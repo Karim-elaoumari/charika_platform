@@ -1,8 +1,9 @@
 <script setup>
-import { Country, City}  from 'country-state-city';
-import { ref, onBeforeMount, computed } from "vue";
+import { Country}  from 'country-state-city';
+import { ref, onBeforeMount } from "vue";
 import { useCompanyStore } from "../../../../stores/company";
 import Loader from "../../../composants/loader.vue";
+const selectedCompany = ref(null);
 const companyStore = useCompanyStore();
 onBeforeMount(() => {
   if(!companyStore.companies.length!=0){
@@ -12,7 +13,7 @@ onBeforeMount(() => {
 </script>
 
 <template>
-<div class="card mt-2">
+<div class="card mt-2" style="min-height: 80vh;">
 <div class="card-body  px-md-5">
 <div class=" table-responsive mt-2">
     <Loader :loaderName="'wait_company'"></Loader>
@@ -23,6 +24,7 @@ onBeforeMount(() => {
       <th>Location</th>
       <th>Employees</th>
       <th>Reviews</th>
+      <th>Stars</th>
       <th>Revenu USD</th>
       <th>Action</th>
     </tr>
@@ -48,11 +50,18 @@ onBeforeMount(() => {
         <p class="text-muted mb-0">{{ company.city }}</p>
       </td>
       <td>{{ company.employees }}</td>
-      <td>{{ company.employees }}</td>
+      <td>{{ company.reviews_count }}</td>
+      <td style="min-width: 100px;">
+            <i class="bi bi-star-fill " :style=" {color: company.stars>0 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>1 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>2 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>3 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>4 ? '#fbc634' : ''}" style="font-size:small;"></i>
+      </td>
       <td>{{ company.revenue }}</td>
       <td>
-        <button type="button" class="btn btn-link btn-sm btn-rounded">
-          Edit
+        <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn  btn-outline-primary btn-sm btn-rounded" @click="selectedCompany=company">
+          Show
         </button>
       </td>
     </tr>
@@ -61,6 +70,54 @@ onBeforeMount(() => {
 </table>
            </div>
 </div>
+</div>
+
+<div class="modal fade" v-if="selectedCompany" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Company information</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body blog entries">
+        <article class="entry">
+            <div id="comment-3" class="comment">
+            <div class="d-flex">
+              <div class="comment-img"><img :src="selectedCompany.logo" style="max-width: 100px;height: 90px;" alt=""></div>
+              <div style="padding-left: 7px;">
+                <h4 style="color: #4154f1;">{{ selectedCompany.name }} </h4>
+                <p class="text-muted mb-0">{{ selectedCompany.industry.name }}</p>
+
+                <p>
+                  <b class="text-bold">Description:</b> {{ selectedCompany.description }}
+                </p>
+                <p>
+                  <b class="text-bold">Mission:</b> {{ selectedCompany.mission }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="entry-meta">
+            <ul>
+              <li class=""><i class="bi bi-wikipedia"></i> <a :href="selectedCompany.website">Website: {{ selectedCompany.website }}</a></li>
+              <li class=""><i class="bi bi-calendar-date"></i> <a href="">Founded: {{ selectedCompany.founded }}</a></li>
+              <li class=""><i class="bi bi-person"></i> <a href="">Employees: {{ selectedCompany.employees }}</a></li>
+              <li class=""><i class="bi bi-chat-dots"></i> <a href="">Reviews: {{ selectedCompany.reviews_count }}</a></li>
+              <li class="d-flex align-items-center"><i class="bi bi-emoji-smile"></i> <a href="">Rate:  <i class="bi bi-star-fill " :style=" {color: selectedCompany.stars>0 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: selectedCompany.stars>1 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: selectedCompany.stars>2 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: selectedCompany.stars>3 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: selectedCompany.stars>4 ? '#fbc634' : ''}" style="font-size:small;"></i></a></li>
+              <li class=""><i class="bi bi-houses"></i> <a href="">Location: {{ Country.getCountryByCode(selectedCompany.country_code).name+" "+selectedCompany.city }}</a></li>
+              <li class=""><i class="bi bi-currency-dollar"></i> <a href="">Revenue: {{ selectedCompany.revenue }}</a></li>
+
+            </ul>
+          </div>
+        </article>
+       
+      </div>
+    </div>
+  </div>
 </div>
 </template>
 <style>

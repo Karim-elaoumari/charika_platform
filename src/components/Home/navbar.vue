@@ -5,9 +5,9 @@ import { useAuthStore } from "../../stores/auth";
 
 const router  = useRouter();
 const waiting = ref(true);
-onBeforeMount(async ()=>{
+onBeforeMount(async()=>{
   if(useAuthStore().getUser==null){
-    await useAuthStore().fetchUser();
+    await useAuthStore().checkAuth('No_redirect');
   }
   waiting.value = false;
 });
@@ -55,31 +55,26 @@ const showDropDown = ref(false);
             <li><a class="dropdown-item" href="#"   @click="Logout">Logout</a></li>
           </ul>
         </li> -->
+       
       </ul>
-      
-      <div data-aos="fade-up" data-aos-delay="600">
-        <div class="text-center text-lg-start">
+      <div>
+        <div class="">
           <a href="#about" class="btn-get-started scrollto d-inline-flex align-items-center justify-content-center align-self-center" v-if="!useAuthStore().getUser">
             <span>Make Review</span>
             <i class="bi bi-arrow-right"></i>
           </a>
-          <!-- <li class="nav-item dropstart" v-if="useAuthStore().getUser" style="list-style: none;">
-          <img :src="useAuthStore().getUser.photo==null?'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png':useAuthStore().getUser.photo" class=" dropdown-toggle" style="width: 50px;border-radius: 50%;height: 50px;border: 2px solid green;"  alt="" data-bs-toggle="dropdown" aria-expanded="false">
-          <ul class="dropdown-menu" v-if="showDropDown">
-          <li><a class="dropdown-item" href="#">Action</a></li>
-            <router-link to="/profile" class="dropdown-item">Profile</router-link>
-            <li><a class="dropdown-item" href="#"   @click="Logout">Logout</a></li> -->
-          <!-- </ul>
-          </li> -->
-          <div class="btn-group dropdown" v-if="useAuthStore().getUser">
-            <img :src="useAuthStore().getUser.photo==null?'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png':useAuthStore().getUser.photo" class="dropdown-toggle me-5" style="width: 50px;border-radius: 50%;height: 50px;border: 2px solid green;"  alt="" data-bs-toggle="dropdown">
-            <ul class="dropdown-menu ">
+        
+          <div class="btn-group dropdown" v-if="useAuthStore().getUser" style="margin-right: 200px;">
+            <img :src="useAuthStore().getUser.photo==null?'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png':useAuthStore().getUser.photo" class="" style="width: 50px;border-radius: 50%;height: 50px;border: 2px solid green;"  alt="" data-bs-toggle="dropdown">
+            <ul class="dropdown-menu">
               <router-link to="/profile" class="dropdown-item">Profile</router-link  >
                <li><a class="dropdown-item" @click="Logout" style="cursor: pointer;">Logout</a></li>
             </ul>
           </div>
         </div>
       </div>
+      
+      
      
       
      
