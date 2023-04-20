@@ -7,6 +7,8 @@ import Dashboard  from "./pages/dashboard.vue";
 import New_company from "./pages/company/new_company.vue";
 import All_companies from "./pages/company/all_companies.vue";
 import My_companies from "./pages/company/my_companies.vue";
+import My_related_reviews from "./pages/review/my_related_reviews.vue";
+import All_reviews from "./pages/review/all_reviews.vue";
 const currentComponent = ref(Dashboard);
 const wrapper = ref("");
 const toggle = () => {
@@ -56,8 +58,8 @@ onBeforeMount(async ()=>{
                             Reviews
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">All Reviews</a></li>
-                            <li><a class="dropdown-item" href="#">My Related Reviews</a></li>
+                            <li><a class="dropdown-item"  @click="currentComponent = All_reviews">All Reviews</a></li>
+                            <li><a class="dropdown-item" @click="currentComponent = My_related_reviews">My Related Reviews</a></li>
                         </ul>
                 </li>
                 <a href="dashboard" type="submit"  class="list-group-item list"><i class="bi bi-chart-bar fs-4 me-2 "></i>Reports</a>             

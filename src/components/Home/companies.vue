@@ -1,33 +1,40 @@
 <script setup>
 import Footer from "./footer.vue";
 import { useCompanyStore } from "../../stores/company";
+import { useIndustyStore } from "../../stores/industry";
 import { Country, City}  from 'country-state-city';
 import { ref, onBeforeMount, computed } from "vue";
 import Loader from "../composants/loader.vue";
 import {useRouter} from 'vue-router'
 const router = useRouter();
+const industryStore = useIndustyStore();
 const companyStore = useCompanyStore();
 const companies = ref([]);
+const wait = ref(false);
 onBeforeMount(async() => {
-  if(!companyStore.companies.length!=0){
-    await companyStore.fetchCompanies();
-    companies.value.push(...companyStore.companies);
+  if(industryStore.getIndustries.length==0){
+    await industryStore.fetchIndustries();
   }
+  if(companyStore.getCompanies.length==0){
+    await companyStore.fetchCompanies();
+  }
+  companies.value.push(...companyStore.getCompanies);
+  wait.value = true;
 });
 const search = ref('');
-
+const industrySelected = ref('');
 const current_page = ref(1);
 const handle_page = (page)=>{
   if(page < 1 || page > Math.ceil(companies.value.length/4)) return;
   current_page.value = page;
 }
 const handle_search = ()=>{
-  if(search.value == ''){
-    companies.value = companyStore.companies;
+  if(industrySelected.value!=''){
+    companies.value = companyStore.companies.filter(company=>company.name.toLowerCase().includes(search.value.toLowerCase()) && company.industry.id==industrySelected.value);
   }else{
-    companies.value = companies.value.filter(company=>company.name.toLowerCase().includes(search.value.toLowerCase()));
+    companies.value = companyStore.companies.filter(company=>company.name.toLowerCase().includes(search.value.toLowerCase()));
   }
-   
+  current_page.value = 1;
 }
 const items = computed(()=>{
   return companies.value.slice((current_page.value-1)*4,current_page.value*4);
@@ -40,7 +47,10 @@ const selectedCompany = (company)=>{
 }
 </script>
 <template>
-<main id="main">
+  <Loader :loaderName="'main'"></Loader>
+  <Loader :loaderName="'wait_company'"></Loader>
+  <Loader :loaderName="'wait_industrie'"></Loader>
+<main id="main" v-if="wait">
 <section class="breadcrumbs">
   <div class="container">
     <h2>Companies</h2>
@@ -54,9 +64,13 @@ const selectedCompany = (company)=>{
         <h5 class="text-primary">Search</h5>
         <div class="d-flex" role="search">
         <input class="form-control me-2" type="search" placeholder="Search by company name ..." aria-label="Search" v-model="search">
-        <button class="btn btn-outline-primary" @click="handle_search">Search</button>
+        <select class="form-select " aria-label="Default select example" v-model="industrySelected">
+          <option selected value="">All Industries</option>
+          <option v-for="industry in industryStore.getIndustries" :value="industry.id">{{ industry.name }}</option>
+        </select>
+        <button class=" ms-2 btn btn-outline-primary" @click="handle_search"><i class="bi bi-search"></i></button>
         </div><br>
-        <Loader :loaderName="'wait_company'"></Loader>
+        
         <article class="entry mt-3" v-for="company in items" style="cursor: pointer;" @click="selectedCompany(company)">
             <div id="comment-3" class="comment">
             <div class="d-flex">
@@ -65,7 +79,7 @@ const selectedCompany = (company)=>{
                 <h4 style="color: #4154f1;">{{ company.name }} </h4>
                 <p class="text-muted mb-0">{{ company.industry.name }}</p>
                 <p>
-                  {{company.description.slice(0, 30) + '...'}}
+                  {{company.description.slice(0, 200) + '...'}}
                 </p>
               </div>
             </div>
@@ -88,7 +102,7 @@ const selectedCompany = (company)=>{
         
         
 
-        <ul class="pagination  justify-content-center mt-3">
+        <ul class="pagination  justify-content-center mt-3" style="cursor: pointer;">
             <li class="page-item">
               <a class="page-link" href="#" aria-label="Previous" @click="handle_page(current_page-1)">
                 <span aria-hidden="true">&laquo;</span>
@@ -112,19 +126,9 @@ const selectedCompany = (company)=>{
 
         
 
-          <h3 class="sidebar-title">Categories</h3>
-          <div class="sidebar-item categories">
-            <ul>
-              <li><a href="#">General <span>(25)</span></a></li>
-              <li><a href="#">Lifestyle <span>(12)</span></a></li>
-              <li><a href="#">Travel <span>(5)</span></a></li>
-              <li><a href="#">Design <span>(22)</span></a></li>
-              <li><a href="#">Creative <span>(8)</span></a></li>
-              <li><a href="#">Educaion <span>(14)</span></a></li>
-            </ul>
-          </div>
+          
 
-          <h3 class="sidebar-title">Recent Posts</h3>
+          <h3 class="sidebar-title">Recent Reviews</h3>
           <div class="sidebar-item recent-posts">
             <div class="post-item clearfix">
               <img src="../../assets/img/blog/blog-recent-1.jpg" alt="">

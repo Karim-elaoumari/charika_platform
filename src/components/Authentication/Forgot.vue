@@ -38,7 +38,7 @@ const handleForgot =() => {
         <div class="col-lg-6 mb-5 mb-lg-0">
           <h1 class="my-5 display-3 fw-bold ls-tight">
             The best Choice  <br />
-            <span class="text-primary">for your Creer</span>
+            <span class="text-primary">for your Carrer</span>
           </h1>
           <p style="color: hsl(217, 10%, 50.8%)">
             Unlock the power of customer feedback to find the best companies

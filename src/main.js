@@ -3,14 +3,11 @@ import { createPinia } from 'pinia';
 import router from './router';
 import './lib/axios';
 import App from './App.vue';
-import JwPagination from 'jw-vue-pagination';
 const app  = createApp(App);
 const pinia = createPinia();
 pinia.use(({ store }) => {
     store.router = markRaw(router)
 });
-
-app.component('jw-pagination', JwPagination);
 app.use(pinia);
 app.use(router);
 

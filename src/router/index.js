@@ -1,5 +1,6 @@
 import { createRouter,createWebHistory } from "vue-router";
 import { useAuthStore } from "../stores/auth";
+import { useCompanyStore } from "../stores/company";
 
 
 const routes = [
@@ -76,6 +77,17 @@ const routes = [
         name:"manager",
         component: ()=> import('../components/manager/dash.vue'),
     },
+    {
+        path : "/not-found",
+        name:"not-found",
+        component: ()=> import('../components/error_pages/not_found.vue') ,
+    },
+    {
+        path :"/server-error",
+        name:"server-error",
+        component: ()=> import('../components/error_pages/server_error.vue') ,
+    },
+
 ];
 
 

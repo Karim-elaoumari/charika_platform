@@ -67,6 +67,9 @@ export const useAuthStore = defineStore("auth", {
       async checkAuth(action='null'){
 
         useLoaderStore().showLoader({name:"main",visibility:false,type:'all'});
+       
+
+      
           try{
             await axios.get('/auth_test',{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
               useLoaderStore().hideLoader('main');
@@ -74,17 +77,27 @@ export const useAuthStore = defineStore("auth", {
             
             });
           } catch (error){
-            if(error.response.status==401){
+            if(error.code=="ERR_NETWORK"){
+              this.router.push({name:'server-error'});
+            }
+            else if(error.response.status==401){
               this.user = null;
-             
               if(action=='No_redirect'){
                 useLoaderStore().hideLoader('main');
               }else{
               this.router.push({name:'login'});
               useLoaderStore().hideLoader('main');
               }
-          }
-        }
+           }else{
+            this.router.push({name:'server-error'});
+           }
+         }
+       
+           
+         
+        
+          
+         
         
       },
 

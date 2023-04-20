@@ -5,21 +5,28 @@ import { useIndustyStore} from "../../../../stores/industry";
 import { useAuthStore } from "../../../../stores/auth";
 import { useAlertStore } from '../../../../stores/alert';
 import { useCompanyStore } from "../../../../stores/company";
+import Swal from 'sweetalert2';
 import Alert from "../../../composants/alert.vue"
 import Loader from "../../../composants/loader.vue";
 const alertStore = useAlertStore();
 const IndustryStore = useIndustyStore();
 const companyStore = useCompanyStore();
-onBeforeMount(async() => {
-  if(IndustryStore.getIndustries.length == 0){
-     await IndustryStore.fetchIndustries();
-  }
-  if(!companyStore.companies.length!=0){
-     await companyStore.fetchCompanies();
-  }
-  
+onBeforeMount(async ()=>{
+    if(!companyStore.getMyCompanies.length){
+        await companyStore.fetchMyCompanies();
+    }
+    if(!IndustryStore.industries.length){
+        await IndustryStore.fetchIndustries();
+    }
 });
-
+const current_page = ref(1);
+const handle_page = (page)=>{
+  if(page < 1 || page > Math.ceil(companyStore.getMyCompanies.length/7)) return;
+  current_page.value = page;
+}
+const items = computed(()=>{
+  return companyStore.getMyCompanies.slice((current_page.value-1)*7,current_page.value*7);
+});
 const form_company  = ref({
     'id' : '',
     'name':'',
@@ -91,6 +98,24 @@ const handle_company = ()=>{
         useCompanyStore().updateCompany(form_company.value.id,form_company.value.name,form_company.value.logo_url,form_company.value.website,form_company.value.country,form_company.value.city,form_company.value.address,form_company.value.industry,form_company.value.foundation_year,form_company.value.employees,form_company.value.revenue,form_company.value.description,form_company.value.mission);
     }
 }
+
+
+const handle_delete = (id)=>{
+  Swal.fire({
+  title: 'Are you sure?',
+  text: "You won't be able to revert this!",
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#3085d6',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Yes'
+}).then((result) => {
+  if (result.isConfirmed) {
+    useCompanyStore().deleteCompany(id);
+  }
+})
+    
+}
 </script>
 
 <template>
@@ -99,7 +124,9 @@ const handle_company = ()=>{
 <div class=" table-responsive mt-2">
     <Loader :loaderName="'wait_company'"></Loader>
     <Loader :loaderName="'wait_industrie'"></Loader>
-    <table class="table align-middle mb-0 bg-white" style="border: 1px solid blue;">
+    <Alert></Alert>
+    <h3 v-if="items.length==0" class="text-center">No companies Available</h3>
+    <table  v-else class="table align-middle mb-0 bg-white" style="border: 1px solid blue;">
   <thead class="bg-light">
     <tr>
       <th>company</th>
@@ -112,7 +139,8 @@ const handle_company = ()=>{
     </tr>
   </thead>
   <tbody>
-    <tr v-for="company in companyStore.companies.filter(company => company.manager.id ==useAuthStore().getUser.id)">
+    <tr v-for="company in items">
+      
       <td>
         <div class="d-flex align-items-center">
           <img
@@ -145,14 +173,29 @@ const handle_company = ()=>{
         <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn  btn-outline-primary btn-sm btn-rounded" @click="assignCompany(company)">
           Edit
         </button>
-        <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn  btn-outline-danger btn-sm btn-rounded ms-2" @click="assignCompany(company)">
-          delete
+        <button type="button"  class="btn  btn-outline-danger btn-sm btn-rounded ms-2" @click="handle_delete(company.id)">
+          Delete
         </button>
       </td>
     </tr>
    
   </tbody>
 </table>
+<ul class="pagination  justify-content-center mt-3" style="cursor: pointer;">
+            <li class="page-item">
+              <a class="page-link" href="#" aria-label="Previous" @click="handle_page(current_page-1)">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li class="page-item"><a class="page-link active" @click="handle_page(current_page)">{{ current_page }}</a></li>
+            <li class="page-item"><a class="page-link" @click="handle_page(current_page+1)">{{ current_page+1 }}</a></li>
+            <li class="page-item"><a class="page-link" @click="handle_page(current_page+2)">{{ current_page+2 }}</a></li>
+            <li class="page-item">
+              <a class="page-link" href="#" aria-label="Next" @click="handle_page(current_page+1)">
+                <span aria-hidden="true" >&raquo;</span>
+              </a>
+            </li>
+</ul>
            </div>
 </div>
 </div>

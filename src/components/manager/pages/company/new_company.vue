@@ -30,6 +30,10 @@ const handle_company = ()=>{
         alertStore.setAlert('alert-danger','Please fill all the fields');
         return;
     }
+    else if(!form_company.value.name.match(/^[a-zA-Z0-9\s]+$/) || form_company.value.name.length > 40 || form_company.value.name.length < 5){
+        alertStore.setAlert('alert-danger','Please enter a valid company name');
+        return;
+    }
     else if(!form_company.value.logo_url.match(/^(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|gif|png)$/)){
         alertStore.setAlert('alert-danger','Please enter a valid logo url');
         return;
@@ -174,7 +178,7 @@ onBeforeMount(async()=>{
     <label class="form-label" for="form6Example7">Mission</label>
   </div>
   
-  <button type="submit" class="btn btn-primary btn-block mb-4">Create New Company</button>
+  <button type="submit" class="btn btn-primary btn-block mb-4" href="#">Create New Company</button>
 </form>
 </div>
 </div>

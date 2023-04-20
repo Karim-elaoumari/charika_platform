@@ -1,13 +1,34 @@
 
 <script setup>
 
-import {ref,onBeforeMount} from "vue";
+import {ref,onBeforeMount,computed} from "vue";
 import Alert from "../composants/alert.vue";
 import Loader from "../composants/loader.vue";
 import Footer from "./footer.vue";
+import { useCompanyStore } from "../../stores/company";
+import { Country, City}  from 'country-state-city';
+import {useRouter} from 'vue-router'
+const router = useRouter();
+const companyStore = useCompanyStore();
+const companies = ref([]);
+onBeforeMount(async() =>{
+  if(companyStore.getCompanies.length==0){
+    await companyStore.fetchCompanies();
+  }
+  companies.value.push(...companyStore.getCompanies);
+});
+const top4CompaniesReveiwed = computed(()=>{
+  return companies.value.sort((a,b)=>b.reviews_count-a.reviews_count).slice(0,6);
+});
+const selectedCompany = (company)=>{
+  
+  company.name = company.name.replace(/\s+/g, '-');
+  router.push({name:'company',params:{name:company.name}});
+}
 </script>
 <template>
    <Loader :loaderName="'main'"></Loader>
+   <Loader :loaderName="'wait_company'"></Loader>
     <!-- <div v-if="authStore.getuser" class="text-danger">  {{ authStore.getuser.email }}</div>
     <div v-else class="text-danger"> anuthetified</div> -->
     <section id="hero" class="hero d-flex align-items-center">
@@ -124,68 +145,6 @@ Stay ahead of the competition with our in-depth reviews and ratings, and experie
     </div>
 
   </div>
-</section><!-- End Counts Section -->
-
-<!-- ======= Features Section ======= -->
-<section id="features" class="features">
-
-  <div class="container" data-aos="fade-up">
-
-    <header class="section-header">
-      <p>Top Industries</p>
-    </header>
-
-    <div class="row align-self-center gy-4">
-          <div class="col-md-3" data-aos="zoom-out" data-aos-delay="200">
-            <div class="feature-box d-flex align-items-center">
-              <i class="bi bi-check"></i>
-              <h3>Eos aspernatur rem</h3>
-            </div>
-          </div>
-
-          <div class="col-md-3" data-aos="zoom-out" data-aos-delay="300">
-            <div class="feature-box d-flex align-items-center">
-              <i class="bi bi-check"></i>
-              <h3>Facilis neque ipsa</h3>
-            </div>
-          </div>
-
-          <div class="col-md-3" data-aos="zoom-out" data-aos-delay="400">
-            <div class="feature-box d-flex align-items-center">
-              <i class="bi bi-check"></i>
-              <h3>Volup amet voluptas</h3>
-            </div>
-          </div>
-
-          <div class="col-md-3" data-aos="zoom-out" data-aos-delay="500">
-            <div class="feature-box d-flex align-items-center">
-              <i class="bi bi-check"></i>
-              <h3>Rerum omnis sint</h3>
-            </div>
-          </div>
-
-          <div class="col-md-3" data-aos="zoom-out" data-aos-delay="600">
-            <div class="feature-box d-flex align-items-center">
-              <i class="bi bi-check"></i>
-              <h3>Alias possimus</h3>
-            </div>
-          </div>
-
-          <div class="col-md-3" data-aos="zoom-out" data-aos-delay="700">
-            <div class="feature-box d-flex align-items-center">
-              <i class="bi bi-check"></i>
-              <h3>Repellendus mollitia</h3>
-            </div>
-          </div>
-          <div class="col-md-3" data-aos="zoom-out" data-aos-delay="700">
-            <div class="feature-box d-flex align-items-center">
-              <i class="bi bi-check"></i>
-              <h3>Repellendus mollitia</h3>
-            </div>
-          </div>
-    </div> 
-  </div>
-
 </section>
 
 
@@ -196,111 +155,41 @@ Stay ahead of the competition with our in-depth reviews and ratings, and experie
   <div class="container" data-aos="fade-up">
 
     <header class="section-header">
-      <p>Some Companies</p>
+      <p>Top Companies</p>
     </header>
 
     <div class="row">
 
-      <div class="col-lg-6 entries blog">
-        <article class="entry">
+      <div class="col-lg-6 entries blog" v-for="company in top4CompaniesReveiwed" @click="selectedCompany(company)">
+        <article class="entry mt-3"  style="cursor: pointer;" >
             <div id="comment-3" class="comment">
             <div class="d-flex">
-              <div class="comment-img"><img src="https://m.media-amazon.com/images/G/01/gc/designs/livepreview/a_generic_white_10_us_noto_email_v2016_us-main._CB627448186_.png" style="max-width: 100px;height: 90px;" alt=""></div>
+              <div class="comment-img"><img :src="company.logo" style="max-width: 100px;height: 90px;" alt=""></div>
               <div style="padding-left: 7px;">
-                <h5><a href="">Amazon</a> </h5>
+                <h4 style="color: #4154f1;">{{ company.name }} </h4>
+                <p class="text-muted mb-0">{{ company.industry.name }}</p>
                 <p>
-                  <b class="text-bold">Description:</b> nesciunt rerum reprehenderit sed. Iste omnis eius repellendus quia nihil ut accusantium tempore. Nesciunt expedita id dolor exercitationem aspernatur aut quam ut. Voluptatem est accusamus iste at.
-                 
+                  {{company.description.slice(0, 200) + '...'}}
                 </p>
               </div>
             </div>
           </div>
           <div class="entry-meta">
             <ul>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Employees:123</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Industry: It consulting</time></a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="blog-single.html">Reviews:1231</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Rate: 2.5/5</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Location: Parie</time></a></li>
+              <li class=""><i class="bi bi-person"></i> <a href="">Employees: {{ company.employees }}</a></li>
+              <li class=""><i class="bi bi-chat-dots"></i> <a href="">Reviews: {{ company.reviews_count }}</a></li>
+              <li class="d-flex align-items-center"><i class="bi bi-emoji-smile"></i> <a href="">Rate:  <i class="bi bi-star-fill " :style=" {color: company.stars>0 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>1 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>2 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>3 ? '#fbc634' : ''}" style="font-size:small;"></i>
+            <i class="bi bi-star-fill " :style=" {color: company.stars>4 ? '#fbc634' : ''}" style="font-size:small;"></i></a></li>
+              <li class=""><i class="bi bi-houses"></i> <a href="">Location: {{ Country.getCountryByCode(company.country_code).name+" "+company.city }}</a></li>
             </ul>
           </div>
         </article>
       </div>
-      <div class="col-lg-6 entries blog">
-        <article class="entry">
-            <div id="comment-3" class="comment">
-            <div class="d-flex">
-              <div class="comment-img"><img src="https://m.media-amazon.com/images/G/01/gc/designs/livepreview/a_generic_white_10_us_noto_email_v2016_us-main._CB627448186_.png" style="max-width: 100px;height: 90px;" alt=""></div>
-              <div style="padding-left: 7px;">
-                <h5><a href="">Amazon</a> </h5>
-                <p>
-                  <b class="text-bold">Description:</b> nesciunt rerum reprehenderit sed. Iste omnis eius repellendus quia nihil ut accusantium tempore. Nesciunt expedita id dolor exercitationem aspernatur aut quam ut. Voluptatem est accusamus iste at.
-                 
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="entry-meta">
-            <ul>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Employees:123</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Industry: It consulting</time></a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="blog-single.html">Reviews:1231</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Rate: 2.5/5</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Location: Parie</time></a></li>
-            </ul>
-          </div>
-        </article>
-      </div>
-      <div class="col-lg-6 entries blog">
-        <article class="entry">
-            <div id="comment-3" class="comment">
-            <div class="d-flex">
-              <div class="comment-img"><img src="https://m.media-amazon.com/images/G/01/gc/designs/livepreview/a_generic_white_10_us_noto_email_v2016_us-main._CB627448186_.png" style="max-width: 100px;height: 90px;" alt=""></div>
-              <div style="padding-left: 7px;">
-                <h5><a href="">Amazon</a> </h5>
-                <p>
-                  <b class="text-bold">Description:</b> nesciunt rerum reprehenderit sed. Iste omnis eius repellendus quia nihil ut accusantium tempore. Nesciunt expedita id dolor exercitationem aspernatur aut quam ut. Voluptatem est accusamus iste at.
-                 
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="entry-meta">
-            <ul>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Employees:123</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Industry: It consulting</time></a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="blog-single.html">Reviews:1231</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Rate: 2.5/5</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Location: Parie</time></a></li>
-            </ul>
-          </div>
-        </article>
-      </div>
-      <div class="col-lg-6 entries blog">
-        <article class="entry">
-            <div id="comment-3" class="comment">
-            <div class="d-flex">
-              <div class="comment-img"><img src="https://m.media-amazon.com/images/G/01/gc/designs/livepreview/a_generic_white_10_us_noto_email_v2016_us-main._CB627448186_.png" style="max-width: 100px;height: 90px;" alt=""></div>
-              <div style="padding-left: 7px;">
-                <h5><a href="">Amazon</a> </h5>
-                <p>
-                  <b class="text-bold">Description:</b> nesciunt rerum reprehenderit sed. Iste omnis eius repellendus quia nihil ut accusantium tempore. Nesciunt expedita id dolor exercitationem aspernatur aut quam ut. Voluptatem est accusamus iste at.
-                 
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="entry-meta">
-            <ul>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Employees:123</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Industry: It consulting</time></a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="blog-single.html">Reviews:1231</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-person"></i> <a href="blog-single.html">Rate: 2.5/5</a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href="blog-single.html"><time datetime="2020-01-01">Location: Parie</time></a></li>
-            </ul>
-          </div>
-        </article>
-      </div>
+      
+     
 
       
 
