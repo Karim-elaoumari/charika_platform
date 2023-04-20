@@ -2,6 +2,8 @@
 import { ref, onBeforeMount,computed } from "vue";
 import { useReviewStore } from "../../../../stores/review";
 import Loader from "../../../composants/loader.vue";
+import {useRouter} from 'vue-router'
+const router = useRouter();
 const reviewStore = useReviewStore();
 onBeforeMount(() => {
   if(!reviewStore.getReviews.length!=0){
@@ -16,6 +18,12 @@ const handle_page = (page)=>{
 const items = computed(()=>{
   return reviewStore.getReviews.slice((current_page.value-1)*7,current_page.value*7);
 });
+
+const selectedReview = (review)=>{
+
+const slug = review.id+'-'+review.reviewer.first_name.replace(/\s+/g, '-')+'-'+review.company_name.replace(/\s+/g, '-')+'-'+review.date.replace(/\//g, '-');
+router.push({name:'review',params:{name:slug}});
+}
 </script>
 
 <template>
@@ -33,6 +41,7 @@ const items = computed(()=>{
       <th>review</th>
       <th>content</th>
       <th>commets</th>
+      <th>Link</th>
     </tr>
   </thead>
   <tbody>
@@ -53,10 +62,14 @@ const items = computed(()=>{
             <i class="bi bi-star-fill " :style=" {color: review.stars>3 ? '#fbc634' : ''}" style="font-size:small;"></i>
             <i class="bi bi-star-fill " :style=" {color: review.stars>4 ? '#fbc634' : ''}" style="font-size:small;"></i>
       </td>
-      <td>{{ review.content }}</td>
+      <td>{{ review.content.slice(0, 200) + '...' }}</td>
       <td>{{ review.comments.length }}</td>
+      <td>
+        <button type="button"  class="btn  btn-outline-primary btn-sm btn-rounded" @click="selectedReview(review)">
+          Show
+        </button>
+      </td>
     </tr>
-   
   </tbody>
 </table>
 <ul class="pagination  justify-content-center mt-3" style="cursor: pointer;">

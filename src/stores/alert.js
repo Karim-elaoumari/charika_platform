@@ -13,9 +13,9 @@ export const useAlertStore = defineStore("alert", {
         getType: (state) => state.type,
     },
     actions: {
-        removeAlert(){
-            this.visibility = "hide";
-        },
+        // removeAlert(){
+        //     this.visibility = "hide";
+        // },
         setAlert(type,message){
             this.type = type;
             this.message = message;

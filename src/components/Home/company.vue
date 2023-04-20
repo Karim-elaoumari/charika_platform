@@ -50,6 +50,13 @@ const handleReview = async () =>{
   reviewForm.value.content = "";
   selectedStar.value = 0;
 };
+
+const selectedReview = (review)=>{
+  //  replace all spaces with - and replace / with -
+
+  const slug = review.id+'-'+review.reviewer.first_name.replace(/\s+/g, '-')+'-'+company.value.name.replace(/\s+/g, '-')+'-'+review.date.replace(/\//g, '-');
+  router.push({name:'review',params:{name:slug}});
+}
 </script>
 <template>
   <Loader :loaderName="'wait_company'"></Loader>
@@ -73,7 +80,7 @@ const handleReview = async () =>{
             <img :src="company.logo" alt="" class="img-fluid col-4" style="height: fit-content;">
             <div class="col-6 p-3">
               <h2 class="entry-title">
-                <a href="">{{company.name}}</a>
+                <a href="" style="text-decoration: none;">{{company.name}}</a>
               </h2>
               <p class="text-muted fs-4">Industry : {{ company.industry.name }}</p>
             </div>
@@ -143,14 +150,13 @@ const handleReview = async () =>{
         <div class="" >
           <h4 class="">{{ company.reviews.length }} Reviews</h4>
         </div>
-       
-        <article class="entry mt-3" v-for="review in company.reviews">
+        <article class="entry mt-3" v-for="review in company.reviews" @click="selectedReview(review)" style="cursor: pointer;">
             <div id="comment-3" class="comment">
             <div class="d-flex">
               <div class="comment-img"><img :src="review.reviewer.photo!=null?review.reviewer.photo:'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png'" style="width: 60px;height:60px;border-radius: 50%;" alt=""><br>
               </div>
               <div style="padding-left: 7px;">
-                 <h5 class="ms-4"><a href="">{{ review.reviewer.first_name+" "+review.reviewer.last_name}}-> {{ company.name }}</a> </h5>
+                 <h5 class="ms-4"><a  style="text-decoration: none;color: #4154f1;">{{ review.reviewer.first_name+" "+review.reviewer.last_name}} -> {{ company.name }}</a> </h5>
                 <div   class="card p-4 mt-4 " style="min-width: 100%;">
                   <p>
                   {{ review.content }}
@@ -185,80 +191,12 @@ const handleReview = async () =>{
       <div class="col-lg-4">
 
         <div class="sidebar">
-
-          <h3 class="sidebar-title">Search</h3>
-          <div class="sidebar-item search-form">
-            <form action="">
-              <input type="text">
-              <button type="submit"><i class="bi bi-search"></i></button>
-            </form>
-          </div>
-
-          <h3 class="sidebar-title">Categories</h3>
-          <div class="sidebar-item categories">
-            <ul>
-              <li><a href="#">General <span>(25)</span></a></li>
-              <li><a href="#">Lifestyle <span>(12)</span></a></li>
-              <li><a href="#">Travel <span>(5)</span></a></li>
-              <li><a href="#">Design <span>(22)</span></a></li>
-              <li><a href="#">Creative <span>(8)</span></a></li>
-              <li><a href="#">Educaion <span>(14)</span></a></li>
-            </ul>
-          </div>
-
-          <h3 class="sidebar-title">Recent Posts</h3>
-          <div class="sidebar-item recent-posts">
-            <div class="post-item clearfix">
-              <img src="../../assets/img/blog/blog-recent-1.jpg" alt="">
-              <h4><a href="blog-single.html">Nihil blanditiis at in nihil autem</a></h4>
-              <time datetime="2020-01-01">Jan 1, 2020</time>
-            </div>
-
-            <div class="post-item clearfix">
-              <img src="../../assets/img/blog/blog-recent-2.jpg" alt="">
-              <h4><a href="blog-single.html">Quidem autem et impedit</a></h4>
-              <time datetime="2020-01-01">Jan 1, 2020</time>
-            </div>
-
-            <div class="post-item clearfix">
-              <img src="../../assets/img/blog/blog-recent-3.jpg" alt="">
-              <h4><a href="blog-single.html">Id quia et et ut maxime similique occaecati ut</a></h4>
-              <time datetime="2020-01-01">Jan 1, 2020</time>
-            </div>
-
-            <div class="post-item clearfix">
-              <img src="../../assets/img/blog/blog-recent-4.jpg" alt="">
-              <h4><a href="blog-single.html">Laborum corporis quo dara net para</a></h4>
-              <time datetime="2020-01-01">Jan 1, 2020</time>
-            </div>
-
-            <div class="post-item clearfix">
-              <img src="../../assets/img/blog/blog-recent-5.jpg" alt="">
-              <h4><a href="blog-single.html">Et dolores corrupti quae illo quod dolor</a></h4>
-              <time datetime="2020-01-01">Jan 1, 2020</time>
-            </div>
-
-          </div>
-
-          <h3 class="sidebar-title">Tags</h3>
-          <div class="sidebar-item tags">
-            <ul>
-              <li><a href="#">App</a></li>
-              <li><a href="#">IT</a></li>
-              <li><a href="#">Business</a></li>
-              <li><a href="#">Mac</a></li>
-              <li><a href="#">Design</a></li>
-              <li><a href="#">Office</a></li>
-              <li><a href="#">Creative</a></li>
-              <li><a href="#">Studio</a></li>
-              <li><a href="#">Smart</a></li>
-              <li><a href="#">Tips</a></li>
-              <li><a href="#">Marketing</a></li>
-            </ul>
-          </div>
-
+          <h3 class="sidebar-title">ADS</h3>
+              <div class="sidebar-item categories" style="padding: 0;">
+                
+            <img width="100%"  src="../../assets/img/ads.png" >
+              </div>
         </div>
-
       </div>
 
     </div>

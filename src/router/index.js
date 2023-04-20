@@ -45,7 +45,7 @@ const routes = [
         component: ()=> import('../components/Home/company.vue') ,
     },
     {
-        path : "/review",
+        path : "/review/:name",
         name:"review",
         component: ()=> import('../components/Home/review.vue') ,
     },

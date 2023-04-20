@@ -69,16 +69,15 @@ export const useReviewStore = defineStore("review",{
                 console.error(error);
               }
         },
-        async fetchReviewByName(name){
-            useLoaderStore().showLoader({name:"wait_company",visibility:false});
+        async fetchReviewById(id){
+            useLoaderStore().showLoader({name:"wait_review",visibility:false});
              try{
-                await axios.get('/companies/'+name).then(response => {
-                  this.selectedCompany = response.data.data;
-                  useLoaderStore().hideLoader("wait_company");
+                await axios.get('/reviews/'+id).then(response => {
+                  this.selectedReveiw = response.data.data;
+                  useLoaderStore().hideLoader("wait_review");
                 });
               } catch (error){
                 if(error.response.status==404){
-                    console.log("not found");
                     this.router.push({name:"not-found"});
                 }
               }
@@ -94,6 +93,49 @@ export const useReviewStore = defineStore("review",{
                 console.error(error);
               }
         },
+        async deleteReview(id){
+          useLoaderStore().showLoader({name:"delete_review",visibility:true});
+          try{
+              await axios.post('delete_review/'+id,null,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+                  useAlertStore().setAlert("alert-success","Review deleted successfully");
+                  this.fetchMyRelatedReviews();
+                  this.reviews =null;
+                  useLoaderStore().hideLoader("delete_review");
+              });
+          }catch(error){
+              useLoaderStore().hideLoader("delete_review");
+              if(error.response.status!=500){
+                  useAlertStore().setAlert("alert-danger",error.response.data.message);
+              }
+              else{
+                  useAlertStore().setAlert("alert-danger","Something went wrong");
+              }
+          }
+      },
+
+      // comment section -----------------
+      async addComment(info){
+        useLoaderStore().showLoader({name:"add_comment",visibility:true});
+        try{
+            await axios.post('/reviews', info,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response =>{ 
+                useAlertStore().setAlert("alert-success","Review submited successfully");
+                this.reviews = response.data.data;
+                useCompanyStore().clearCompanies();
+                useCompanyStore().fetchReviewById(info.review_id);
+                useLoaderStore().hideLoader("add_comment");
+                
+
+            });
+        } catch (error){
+            useLoaderStore().hideLoader("add_comment");
+          if(error.response.status!=500){
+                useAlertStore().setAlert("alert-danger",error.response.data.message);
+          }
+          else{
+              useAlertStore().setAlert("alert-danger","Something went wrong");
+          }
+        }
+    },
 
 
     }

@@ -1,8 +1,47 @@
 <script setup>
 import Footer from "./footer.vue";
+import { ref, onBeforeMount, computed } from "vue";
+import Alert from "../composants/alert.vue";
+import { useAlertStore } from "../../stores/alert";
+import { useRouter } from "vue-router";
+import { useReviewStore } from "../../stores/review";
+import Loader from "../composants/loader.vue";
+const reviewStore = useReviewStore();
+const alertStore = useAlertStore();
+const router = useRouter();
+
+const wait = ref(false);
+// get the id of the review from the name in the url 
+const slug = router.currentRoute.value.params.name;
+const review_id = slug.split("-")[0];
+
+const review = computed(()=>reviewStore.getReview);
+onBeforeMount(async () =>{
+  if(reviewStore.getReview==null || reviewStore.getReview.id!=review_id){
+    await reviewStore.fetchReviewById(review_id);
+  }
+  wait.value = true;
+});
+// comment script 
+
+
+const CommentForm = ref({
+  review_id: '',
+  content: '',
+});
+const handleComment = async () =>{
+  if (CommentForm.value.content == ""){
+    alertStore.setAlert('alert-danger','Please enter at least Some words');
+    return;
+  }
+  CommentForm.value.review_id = review.value.id;
+  await useReviewStore().addComment(CommentForm.value);
+  CommentForm.value.content = "";
+};
 </script>
 <template>
- <main id="main">
+  <Loader :loaderName="'wait_review'"></Loader>
+ <main id="main" v-if="wait">
 
 <section class="breadcrumbs">
   <div class="container">
@@ -24,27 +63,32 @@ import Footer from "./footer.vue";
             <article class="entry">
             <div id="comment-3" class="comment">
             <div class="d-flex">
-              <div class="comment-img"><img src="../../assets/img/blog/comments-5.jpg" style="max-width: 100px;border-radius: 50%;" alt="">
-                <img src="https://m.media-amazon.com/images/G/01/gc/designs/livepreview/a_generic_white_10_us_noto_email_v2016_us-main._CB627448186_.png" style="width: 40px;height:40px;border-radius: 50%;border: 1px black solid;margin-left: 56px;margin-top: -45px;" alt="">
+              <div class="comment-img"><img :src="review.reviewer.photo!=null?review.reviewer.photo:'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png'" style="width: 100px;border-radius: 50%;height: 100px;" alt=""><br>
+                <img :src="review.company_logo" style="width: 40px;height:40px;border-radius: 50%;border: 1px black solid;margin-left: 56px;margin-top: -45px;" alt="">
               </div>
              
               <div style="padding-left: 7px;">
-                <h5><a href="">Karim -> Amazon</a> </h5>
+                <h5 class="ms-4 "><a href="" style="text-decoration: none;">{{ review.reviewer.first_name+" "+review.reviewer.last_name}} -> {{ review.company_name }}</a> </h5>
                 <time datetime="2020-01-01">01 Jan, 2020</time>
                 <p>
-                  Distinctio nesciunt rerum reprehenderit sed. Iste omnis eius repellendus quia nihil ut accusantium tempore. Nesciunt expedita id dolor exercitationem aspernatur aut quam ut. Voluptatem est accusamus iste at.
-                  Officiis animi maxime nulla quo et harum eum quis a. Sit hic in qui quos fugit ut rerum atque. Optio provident dolores atque voluptatem rem excepturi molestiae qui. Voluptatem laborum omnis ullam quibusdam perspiciatis nulla nostrum. Voluptatum est libero eum nesciunt aliquid qui. Quia et suscipit non sequi. Maxime sed odit. Beatae nesciunt nesciunt accusamus quia aut ratione aspernatur dolor. Sint harum eveniet dicta exercitationem minima. Exercitationem omnis asperiores natus aperiam dolor consequatur id ex sed. Quibusdam rerum dolores sint consequatur quidem ea. Beatae minima sunt libero soluta sapiente in rem assumenda. Et qui odit voluptatem. Cum quibusdam voluptatem voluptatem accusamus mollitia aut atque aut.
-                 
+                  {{ review.content }}
                 </p>
               </div>
             </div>
           </div>
 
-          <div class="entry-meta">
+          <div class="entry-meta mt-3">
             <ul>
-              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href=""><time datetime="2020-01-01">Jan 1, 2020</time></a></li>
-              <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="">12 Comments</a></li>
+              <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href=""><time>{{ review.date+" "+review.time }}</time></a></li>
+              <li class="d-flex align-items-center"><i class="bi bi-chat-dots"></i> <a href="">{{ review.comments.length }} Comments</a></li>
             </ul>
+            <div class="text-end"> I rate this company :
+                <i class="bi bi-star-fill " :style=" {color: review.stars>0 ? '#fbc634' : ''}" ></i>
+                <i class="bi bi-star-fill " :style=" {color: review.stars>1 ? '#fbc634' : ''}" ></i>
+                <i class="bi bi-star-fill " :style=" {color: review.stars>2 ? '#fbc634' : ''}" ></i>
+                <i class="bi bi-star-fill " :style=" {color: review.stars>3 ? '#fbc634' : ''}" ></i>
+                <i class="bi bi-star-fill " :style=" {color: review.stars>4 ? '#fbc634' : ''}" ></i>
+            </div>
           </div>
 
 
@@ -53,35 +97,20 @@ import Footer from "./footer.vue";
         </div>
         <div class="blog-comments">
 
-          <h4 class="comments-count">8 Comments</h4>
-
-          <div id="comment-1" class="comment">
+          <h4 class="comments-count"> {{ review.comments.length }} Comments</h4>
+          <div class="comment" v-for=" comment in review.comments">
             <div class="d-flex">
-              <div class="comment-img"><img src="../../assets/img/blog/comments-1.jpg" alt=""></div>
+              <div class="comment-img"><img :src="comment.user.photo!=null?comment.user.photo:'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png'" alt=""></div>
               <div>
-                <h5><a href="">Georgia Reader</a></h5>
-                <time datetime="2020-01-01">01 Jan, 2020</time>
+                <h5><a >{{ comment.user.first_name + comment.user.last_name }}</a></h5>
+                <time datetime="2020-01-01">{{ comment.date  }} : {{ comment.time  }}</time>
                 <p>
-                  Et rerum totam nisi. Molestiae vel quam dolorum vel voluptatem et et. Est ad aut sapiente quis molestiae est qui cum soluta.
-                  Vero aut rerum vel. Rerum quos laboriosam placeat ex qui. Sint qui facilis et.
+                  {{ comment.content }}
                 </p>
               </div>
             </div>
           </div>
 
-          <div id="comment-2" class="comment">
-            <div class="d-flex">
-              <div class="comment-img"><img src="../../assets/img/blog/comments-2.jpg" alt=""></div>
-              <div>
-                <h5><a href="">Aron Alvarado</a> </h5>
-                <time datetime="2020-01-01">01 Jan, 2020</time>
-                <p>
-                  Ipsam tempora sequi voluptatem quis sapiente non. Autem itaque eveniet saepe. Officiis illo ut beatae.
-                </p>
-              </div>
-            </div>
-
-          </div>
 
           
 
@@ -112,92 +141,19 @@ import Footer from "./footer.vue";
 
  
 
-  <h3 class="sidebar-title">Filter by Rates:</h3>
-  <div class="sidebar-item categories">
-    <ul>
-      <li>
-            <div class="ratings">
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill "  style="color:#fbc634"></i>
-            </div>
-      </li>
-      <li>
-            <div class="ratings">
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill "  ></i>
-            </div>
-      </li>
-      <li>
-            <div class="ratings">
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " ></i>
-                <i class="bi bi-star-fill "  ></i>
-            </div>
-      </li>
-      <li>
-            <div class="ratings">
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " ></i>
-                <i class="bi bi-star-fill " ></i>
-                <i class="bi bi-star-fill "  ></i>
-            </div>
-      </li>
-      <li>
-            <div class="ratings">
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " ></i>
-                <i class="bi bi-star-fill " ></i>
-                <i class="bi bi-star-fill " ></i>
-                <i class="bi bi-star-fill "  ></i>
-            </div>
-      </li>
-    </ul>
+  <h3 class="sidebar-title">ADS</h3>
+  <div class="sidebar-item categories" style="padding: 0;">
+    
+<img width="100%"  src="../../assets/img/ads.png" >
   </div>
 
-  <h3 class="sidebar-title">Some Companies</h3>
-  <div class="sidebar-item recent-posts">
-    <div class="post-item clearfix">
-      <img src="https://m.media-amazon.com/images/G/01/gc/designs/livepreview/a_generic_white_10_us_noto_email_v2016_us-main._CB627448186_.png" alt="">
-      <h4 class="row "><a href="blog-single.html" class="col-6">Amazon</a>
-        <div class="ratings col-6">
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " ></i>
-                <i class="bi bi-star-fill "  ></i>
-      </div>
-      </h4>
-      <div>Industry : IT consulting</div>
-      
-    </div>
-    <hr>
-
-    <div class="post-item clearfix">
-      <img src="https://m.media-amazon.com/images/G/01/gc/designs/livepreview/a_generic_white_10_us_noto_email_v2016_us-main._CB627448186_.png" alt="">
-      <h4 class="row "><a href="" class="col-6">Amazon</a>
-        <div class="ratings col-6">
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " style="color:#fbc634"></i>
-                <i class="bi bi-star-fill " ></i>
-                <i class="bi bi-star-fill " ></i>
-      </div>
-      </h4>
-      <div>Industry : IT consulting</div>
-    </div>
+  
 
     
 
-  </div>
+    
+
+
 
 
 </div>

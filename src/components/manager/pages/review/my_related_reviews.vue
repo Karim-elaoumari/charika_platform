@@ -2,8 +2,11 @@
 import { ref, onBeforeMount,computed } from "vue";
 import { useReviewStore } from "../../../../stores/review";
 import Loader from "../../../composants/loader.vue";
+import Alert from "../../../composants/alert.vue"
 import Swal from 'sweetalert2';
+import {useRouter} from 'vue-router'
 import { useAlertStore } from '../../../../stores/alert';
+const router = useRouter();
 const reviewStore = useReviewStore();
 onBeforeMount(() => {
   if(!reviewStore.getMyRelatedReviews.length!=0){
@@ -20,6 +23,12 @@ const items = computed(()=>{
 });
 
 
+const selectedReview = (review)=>{
+
+  const slug = review.id+'-'+review.reviewer.first_name.replace(/\s+/g, '-')+'-'+review.company_name.replace(/\s+/g, '-')+'-'+review.date.replace(/\//g, '-');
+  router.push({name:'review',params:{name:slug}});
+}
+
 const handle_delete = (id)=>{
   Swal.fire({
   title: 'Are you sure?',
@@ -31,7 +40,7 @@ const handle_delete = (id)=>{
   confirmButtonText: 'Yes'
 }).then((result) => {
   if (result.isConfirmed) {
-    useCompanyStore().deleteCompany(id);
+    reviewStore.deleteReview(id);
   }
 })
     
@@ -43,6 +52,7 @@ const handle_delete = (id)=>{
 <div class="card-body  px-md-5">
 <div class=" table-responsive mt-2">
     <Loader :loaderName="'wait_review'"></Loader>
+    <Alert></Alert>
     <h3 v-if="items.length==0" class="text-center">No Reviews Available</h3>
     <table v-else class="table align-middle mb-0 bg-white" style="border: 1px solid blue;" >
   <thead class="bg-light">
@@ -53,6 +63,7 @@ const handle_delete = (id)=>{
       <th>review</th>
       <th>content</th>
       <th>commets</th>
+      <th>Link</th>
       <th>Action</th>
     </tr>
   </thead>
@@ -74,12 +85,18 @@ const handle_delete = (id)=>{
             <i class="bi bi-star-fill " :style=" {color: review.stars>3 ? '#fbc634' : ''}" style="font-size:small;"></i>
             <i class="bi bi-star-fill " :style=" {color: review.stars>4 ? '#fbc634' : ''}" style="font-size:small;"></i>
       </td>
-      <td>{{ review.content }}</td>
+      <td>{{ review.content.slice(0, 200) + '...' }} </td>
       <td>{{ review.comments.length }}</td>
       <td>
-        <button type="button"  class="btn  btn-outline-danger btn-sm btn-rounded">
+        <button type="button"  class="btn  btn-outline-primary btn-sm btn-rounded" @click="selectedReview(review)">
+          Show
+        </button>
+      </td>
+      <td>
+        <button type="button"  class="btn  btn-outline-danger btn-sm btn-rounded" @click="handle_delete(review.id)">
           Delete
         </button>
+        
       </td>
     </tr>
    

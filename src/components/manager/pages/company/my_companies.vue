@@ -8,6 +8,8 @@ import { useCompanyStore } from "../../../../stores/company";
 import Swal from 'sweetalert2';
 import Alert from "../../../composants/alert.vue"
 import Loader from "../../../composants/loader.vue";
+import {useRouter} from 'vue-router'
+const router = useRouter();
 const alertStore = useAlertStore();
 const IndustryStore = useIndustyStore();
 const companyStore = useCompanyStore();
@@ -116,6 +118,12 @@ const handle_delete = (id)=>{
 })
     
 }
+
+const selectedCompanyLink = (company)=>{
+  
+  const slug = company.name.replace(/\s+/g, '-');
+  router.push({name:'company',params:{name:slug}});
+}
 </script>
 
 <template>
@@ -135,6 +143,7 @@ const handle_delete = (id)=>{
       <th>Reviews</th>
       <th>Stars</th>
       <th>Revenu USD</th>
+      <th>Link</th>
       <th>Action</th>
     </tr>
   </thead>
@@ -169,6 +178,13 @@ const handle_delete = (id)=>{
             <i class="bi bi-star-fill " :style=" {color: company.stars>4 ? '#fbc634' : ''}" style="font-size:small;"></i>
       </td>
       <td>{{ company.revenue }}</td>
+      <td>
+        <td>
+        <button type="button"  class="btn  btn-outline-primary btn-sm btn-rounded" @click="selectedCompanyLink(company)">
+          Show
+        </button>
+      </td>
+      </td>
       <td>
         <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn  btn-outline-primary btn-sm btn-rounded" @click="assignCompany(company)">
           Edit

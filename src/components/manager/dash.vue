@@ -62,7 +62,7 @@ onBeforeMount(async ()=>{
                             <li><a class="dropdown-item" @click="currentComponent = My_related_reviews">My Related Reviews</a></li>
                         </ul>
                 </li>
-                <a href="dashboard" type="submit"  class="list-group-item list"><i class="bi bi-chart-bar fs-4 me-2 "></i>Reports</a>             
+                
  </div>
  <div class="container">
     <component :is="currentComponent"></component>
