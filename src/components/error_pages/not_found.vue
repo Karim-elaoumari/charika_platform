@@ -14,7 +14,7 @@ const route = useRoute();
 		
 		
 		</div>
-		
+			  
 		<div class="contant_box_404">
 		<h3 class="h2">
 		Look like you're lost

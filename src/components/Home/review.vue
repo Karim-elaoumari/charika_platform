@@ -3,9 +3,11 @@ import Footer from "./footer.vue";
 import { ref, onBeforeMount, computed } from "vue";
 import Alert from "../composants/alert.vue";
 import { useAlertStore } from "../../stores/alert";
+import { useAuthStore } from "../../stores/auth";
 import { useRouter } from "vue-router";
 import { useReviewStore } from "../../stores/review";
 import Loader from "../composants/loader.vue";
+import Swal from 'sweetalert2';
 const reviewStore = useReviewStore();
 const alertStore = useAlertStore();
 const router = useRouter();
@@ -38,12 +40,50 @@ const handleComment = async () =>{
   await useReviewStore().addComment(CommentForm.value);
   CommentForm.value.content = "";
 };
+
+const delete_review = ref(false)
+const handle_delete_review = (id)=>{
+  Swal.fire({
+  title: 'Are you sure?',
+  text: "You won't be able to revert this!",
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#3085d6',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Yes'
+}).then(async(result) => {
+  if (result.isConfirmed) {
+    delete_review.value = true
+    await reviewStore.deleteReview(review_id);
+    delete_review.value = false
+    router.push({name:'reviews'});
+  }
+})   
+}
+const delete_comment = ref(false);
+const handle_delete_comment =(id)=>{
+  Swal.fire({
+  title: 'Are you sure?',
+  text: "You won't be able to revert this!",
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#3085d6',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Yes'
+}).then(async(result) => {
+  if (result.isConfirmed) {
+    delete_comment.value = id;
+   await reviewStore.deleteComment(id,review_id);
+   delete_comment.value = false;
+  }
+})
+}
 </script>
 <template>
   <Loader :loaderName="'wait_review'"></Loader>
  <main id="main" v-if="wait">
 
-<section class="breadcrumbs">
+<section class="breadcrumbs mt-0" style="height: 60px;">
   <div class="container">
     <h2>Review</h2>
 
@@ -89,7 +129,16 @@ const handleComment = async () =>{
                 <i class="bi bi-star-fill " :style=" {color: review.stars>3 ? '#fbc634' : ''}" ></i>
                 <i class="bi bi-star-fill " :style=" {color: review.stars>4 ? '#fbc634' : ''}" ></i>
             </div>
+           
           </div>
+          <div v-if="useAuthStore().getUser">
+            
+            <div style="cursor: pointer;" v-if="review.reviewer.id==useAuthStore().getUser.id">
+              <div class="spinner-border text-primary spinner " v-if="delete_review" style="font-size: small;"></div>
+              <i class="bi bi-trash3 text-danger ms-3" @click="handle_delete_review" v-else></i>
+            </div>
+          </div>
+         
 
 
                    
@@ -98,15 +147,24 @@ const handleComment = async () =>{
         <div class="blog-comments">
 
           <h4 class="comments-count"> {{ review.comments.length }} Comments</h4>
-          <div class="comment" v-for=" comment in review.comments">
+          <div class="comment" v-for=" comment in review.comments"  tabindex="0" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-content="Disabled popover">
+           
             <div class="d-flex">
-              <div class="comment-img"><img :src="comment.user.photo!=null?comment.user.photo:'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png'" alt=""></div>
+              <div class="comment-img"><img :src="comment.user.photo!=null?comment.user.photo:'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png'" alt="" style="border-radius: 30%;width:45px;height: 45px;" ></div>
               <div>
                 <h5><a >{{ comment.user.first_name + comment.user.last_name }}</a></h5>
                 <time datetime="2020-01-01">{{ comment.date  }} : {{ comment.time  }}</time>
                 <p>
                   {{ comment.content }}
                 </p>
+                <div v-if="useAuthStore().getUser">
+               
+                <div style="cursor: pointer;" v-if="comment.user.id==useAuthStore().getUser.id">
+                   <div class="spinner-border text-primary spinner " v-if="delete_comment==comment.id" style="font-size: small;"></div>
+                    <i class="bi bi-trash3 text-danger ms-3" @click="handle_delete_comment(comment.id)"  v-else></i>
+                 </div>
+                </div>
+               
               </div>
             </div>
           </div>
@@ -116,13 +174,15 @@ const handleComment = async () =>{
 
         
 
-          <div class="reply-form">
+          <div class="reply-form card">
             <h4>Leave a Comment</h4>
-            <form action="">
-              
+           
+                <form @submit.prevent="handleComment">
+                  <Alert/>
+                    <Loader :loaderName="'add_comment'"></Loader>
               <div class="row">
                 <div class="col form-group">
-                  <textarea name="comment" class="form-control" placeholder="Your Comment*"></textarea>
+                  <textarea name="comment" class="form-control" placeholder="Your Comment" v-model="CommentForm.content"></textarea>
                 </div>
               </div>
               <button type="submit" class="btn btn-primary">Post Comment</button>

@@ -33,7 +33,13 @@ export const useReviewStore = defineStore("review",{
             } catch (error){
                 useLoaderStore().hideLoader("add_review");
               if(error.response.status!=500){
+                if(error.response.status==401){
+                    useAlertStore().setAlert("alert-info",'You need to login first or create account');
+                }
+                else{
                     useAlertStore().setAlert("alert-danger",error.response.data.message);
+                }
+                   
               }
               else{
                   useAlertStore().setAlert("alert-danger","Something went wrong");
@@ -99,7 +105,8 @@ export const useReviewStore = defineStore("review",{
               await axios.post('delete_review/'+id,null,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
                   useAlertStore().setAlert("alert-success","Review deleted successfully");
                   this.fetchMyRelatedReviews();
-                  this.reviews =null;
+                  this.reviews =[];
+                  useCompanyStore().clearCompanies();
                   useLoaderStore().hideLoader("delete_review");
               });
           }catch(error){
@@ -117,11 +124,11 @@ export const useReviewStore = defineStore("review",{
       async addComment(info){
         useLoaderStore().showLoader({name:"add_comment",visibility:true});
         try{
-            await axios.post('/reviews', info,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response =>{ 
-                useAlertStore().setAlert("alert-success","Review submited successfully");
-                this.reviews = response.data.data;
-                useCompanyStore().clearCompanies();
-                useCompanyStore().fetchReviewById(info.review_id);
+            await axios.post('/comments', info,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response =>{ 
+              
+                this.selectedReveiw = null;
+                this.reviews = [];
+                this.fetchReviewById(info.review_id);
                 useLoaderStore().hideLoader("add_comment");
                 
 
@@ -129,11 +136,29 @@ export const useReviewStore = defineStore("review",{
         } catch (error){
             useLoaderStore().hideLoader("add_comment");
           if(error.response.status!=500){
+            if(error.response.status==401){
+                useAlertStore().setAlert("alert-info",'You need to login first or create account');
+            }
+            else{
                 useAlertStore().setAlert("alert-danger",error.response.data.message);
+            }
           }
           else{
               useAlertStore().setAlert("alert-danger","Something went wrong");
           }
+        }
+    },
+    async deleteComment(id,review_id){
+        useLoaderStore().showLoader({name:"delete_comment",visibility:true});
+        try{
+            await axios.post('delete_comment/'+id,null,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+                this.selectedReveiw = null;
+                this.reviews = [];
+                this.fetchReviewById(review_id);
+                useLoaderStore().hideLoader("delete_comment");
+            });
+        }catch(error){
+            useLoaderStore().hideLoader("delete_comment");
         }
     },
 

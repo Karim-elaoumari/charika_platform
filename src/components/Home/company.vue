@@ -61,7 +61,7 @@ const selectedReview = (review)=>{
 <template>
   <Loader :loaderName="'wait_company'"></Loader>
  <main id="main"  v-if="wait">
-<section class="breadcrumbs">
+<section class="breadcrumbs mt-0" style="height: 60px;">
   <div class="container">
     <h2>Company</h2>
 

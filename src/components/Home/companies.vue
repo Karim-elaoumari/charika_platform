@@ -50,7 +50,7 @@ const selectedCompany = (company)=>{
   <Loader :loaderName="'wait_company'"></Loader>
   <Loader :loaderName="'wait_industrie'"></Loader>
 <main id="main" v-if="wait">
-<section class="breadcrumbs">
+<section class="breadcrumbs mt-0" style="height: 60px;">
   <div class="container">
     <h2>Companies</h2>
   </div>
@@ -122,13 +122,13 @@ const selectedCompany = (company)=>{
       <div class="col-lg-4">
 
         <div class="sidebar">
-          <div class="sidebar">
+         
           <h3 class="sidebar-title">ADS</h3>
               <div class="sidebar-item categories" style="padding: 0;">
                 
             <img width="100%"  src="../../assets/img/ads.png" >
               </div>
-        </div>
+       
 
         </div>
 

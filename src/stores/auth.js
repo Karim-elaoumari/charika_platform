@@ -212,7 +212,6 @@ export const useAuthStore = defineStore("auth", {
           else{
               useAlertStore().setAlert("alert-danger","Something went wrong");
           }
-          alert(error.response.data.message);
       }
   },
   async updatePassword(last_password,new_password,confirm_password){

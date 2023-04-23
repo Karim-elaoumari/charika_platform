@@ -44,7 +44,7 @@ const selectedReview = (review)=>{
 <template>
   <Loader :loaderName="'main'"></Loader>
 <main id="main">
-<section class="breadcrumbs">
+<section class="breadcrumbs mt-0" style="height: 60px;" >
   <div class="container">
     <h2>Reviews</h2>
   </div>
