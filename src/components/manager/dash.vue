@@ -1,5 +1,5 @@
 <script setup>
-import { ref,onBeforeMount } from "vue";
+import { ref,onBeforeMount,computed } from "vue";
 import Footer from "../Home/footer.vue";
 import Loader from "../composants/loader.vue";
 import { useAuthStore } from "../../stores/auth";
@@ -11,6 +11,12 @@ import My_related_reviews from "./pages/review/my_related_reviews.vue";
 import All_reviews from "./pages/review/all_reviews.vue";
 const currentComponent = ref(Dashboard);
 const wrapper = ref("");
+const wait = computed(()=>{
+  if(useAuthStore().getRole=='manager') return true;
+  else return false;
+}
+);
+
 const toggle = () => {
     if(wrapper.value == "toggled"){
         wrapper.value = "";
@@ -19,14 +25,14 @@ const toggle = () => {
     }
 };
 onBeforeMount(async ()=>{
-  if(useAuthStore().getUser==false){
-    await useAuthStore().checkAuth();
+  if(useAuthStore().getUser==null|| wait.value==false){
+    await useAuthStore().checkAuth('manager');
   }
 });
 </script>
 <template>
 <Loader :loaderName="'main'"></Loader>
-<div id="page-content-wrapper" class="box">
+<div id="page-content-wrapper" class="box" v-if="wait">
 <nav class="navbar navbar-expand-lg navbar-light bg-transparent p-3  justify-content-between" id="">
             <i class="bi bi-list mycolor fs-3" @click="toggle" style="cursor: pointer;"></i>
             <div class="d-flex align-items-center ms-auto">
@@ -42,10 +48,10 @@ onBeforeMount(async ()=>{
             <div class="sidebar-heading text-center d-flex flex-column py-4 fs-5 border-bottom mt-5">
                 <button type="submit" name="logout" class="btn btn-lg btn-block btn-light my-3 mycolor button1 fs-6 w-100">Log out</button>
 </div>
-                <a  @click="currentComponent = Dashboard" class="list-group-item list" style="cursor: pointer;"><i class="bi bi-chart-bar fs-4 me-2 "></i>Dashboard</a>
+                <a  @click="currentComponent = Dashboard" class="list-group-item list" style="cursor: pointer;"><i class="bi bi-speedometer2 fs-4 me-2 "></i>Dashboard</a>
                 <li class="nav-item dropdown" style="list-style: none;margin-left: 10px;">
                         <a class="list-group-item list" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Companies
+                          <i class="bi bi-building fs-4 me-2 "></i> Companies
                         </a>
                         <ul class="dropdown-menu" style="cursor: pointer;">
                             <li><a class="dropdown-item" @click="currentComponent = New_company">New Company</a></li>
@@ -55,7 +61,7 @@ onBeforeMount(async ()=>{
                 </li>
                 <li class="nav-item dropdown" style="list-style: none;margin-left: 10px;">
                         <a class="list-group-item list" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Reviews
+                          <i class="bi bi-chat-left-text fs-4 me-2 "></i> Reviews
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item"  @click="currentComponent = All_reviews">All Reviews</a></li>

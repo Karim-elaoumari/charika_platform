@@ -7,10 +7,12 @@ import {useRouter} from 'vue-router'
 export const useAuthStore = defineStore("auth", {
     state:() => ({
       user: null,
+      role: null,
       router : useRouter()
     }),
     getters: {
       getUser: (state) => state.user,
+      getRole: (state) => state.role,
     },
     actions: {
         async login(email, password){
@@ -19,6 +21,7 @@ export const useAuthStore = defineStore("auth", {
             .then(response => {
                Cookies.set('token', response.data.authorisation.token);
                 this.user = response.data.user;
+                this.role = response.data.user.role;
                 useLoaderStore().hideLoader('login');
                 this.router.push({name:'home'});
             }).catch(error => {
@@ -55,6 +58,7 @@ export const useAuthStore = defineStore("auth", {
             try {
                 await axios.post('/logout',null,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
                   this.user = null;
+                  this.role = null;
                   Cookies.remove('token');
                   useAlertStore().setAlert("alert-warning","Loged out successfully");
                   this.router.push({name:'home'});
@@ -64,16 +68,20 @@ export const useAuthStore = defineStore("auth", {
                 return false;
               }
         },
-      async checkAuth(action='null'){
-
+       // verification permission  -----------------------------------------------------------------------
+      async checkAuth(action){
         useLoaderStore().showLoader({name:"main",visibility:false,type:'all'});
-       
-
-      
+        console.log(action)
           try{
             await axios.get('/auth_test',{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+                this.user = response.data.user;
+                this.role = response.data.user.role;
+              if(action=='manager' && this.user.role!='manager' ){
+                this.router.push({name:'home'});
+              }else if(action=='admin' && this.user.role!='admin'){
+                this.router.push({name:'home'});
+              }
               useLoaderStore().hideLoader('main');
-              this.user = response.data.user;
             
             });
           } catch (error){
@@ -91,16 +99,9 @@ export const useAuthStore = defineStore("auth", {
            }else{
             this.router.push({name:'server-error'});
            }
-         }
-       
-           
-         
-        
-          
-         
-        
+         } 
       },
-
+     
       async verifyEmail(email, code){
         useLoaderStore().showLoader({name:"verify-Email",visibility:true});
          await axios.post('/verify-email', {email, code})
@@ -170,29 +171,13 @@ export const useAuthStore = defineStore("auth", {
              useAlertStore().setAlert("alert-danger","Something went wrong");
          }
      },);
-    },
-    // user info ------------------------------------------------------------------------------------------------
-    async fetchUser(){
-      useLoaderStore().showLoader({name:"main",visibility:false,type:'all'});
-      try {
-          await axios.get('/user',{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
-            this.user = response.data.data;
-           
-            useLoaderStore().hideLoader('main');
-          });
-        } catch (error) {
-          if(error.response.status==401){
-            this.user = null;
-           
-            useLoaderStore().hideLoader('main');
-          }
-        }
-},  
+    }, 
   async updateUser(info){
       useLoaderStore().showLoader({name:"updateInfoUser",visibility:true});
       try {
           await axios.post('/update_user_info',info,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
             this.user = response.data.user;
+            this.role = response.data.user.role;
             useLoaderStore().hideLoader('updateInfoUser');
             useAlertStore().setAlert("alert-success",response.data.message);
           }

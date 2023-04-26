@@ -45,6 +45,16 @@ const routes = [
         component: ()=> import('../components/Home/company.vue') ,
     },
     {
+        path : "/comp_vs_comp",
+        name:"comp_vs_comp",
+        component: ()=> import('../components/Home/comp_vs_comp.vue') ,
+    },
+    {
+        path : "/comp_vs_comp/:name",
+        name:"comp_vs_comp_chart",
+        component: ()=> import('../components/Home/comp_vs_comp_chart.vue'),
+    },
+    {
         path : "/review/:name",
         name:"review",
         component: ()=> import('../components/Home/review.vue') ,
@@ -67,15 +77,14 @@ const routes = [
         component: ()=> import('../components/Home/profile.vue') ,
     },
     {
-        beforeEnter: async (to, from, next) => {
-            if(useAuthStore().getUser==null){
-                await useAuthStore().checkAuth();
-            }
-            next();
-        },
         path : "/manager",
         name:"manager",
         component: ()=> import('../components/manager/dash.vue'),
+    },
+    {
+        path : "/admin",
+        name:"admin",
+        component: ()=> import('../components/admin/dash.vue'),
     },
     {
         path : "/not-found",

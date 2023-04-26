@@ -7,14 +7,18 @@ import {useRouter} from 'vue-router'
 export const useCompanyStore = defineStore("company", {
     state:() => ({
         companies:[],
+        allCompanies:[],
         selectedCompany : null,
+        selectedTwoCompanies : [],
         myCompanies : [],
         router : useRouter()
     }),
     getters:{
         getCompanies: (state) => { return state.companies},
         getCompany : (state) => { return state.selectedCompany},
-        getMyCompanies : (state) => { return state.myCompanies}
+        getTwoCompanies : (state) => { return state.selectedTwoCompanies},
+        getMyCompanies : (state) => { return state.myCompanies},
+        getAllCompanies : (state) => { return state.allCompanies}
     },
     actions:{
         async addCompany(name,logo,website,country_code,city,address,industry,foundation_year,employees,revenue,description,mission){
@@ -65,6 +69,17 @@ export const useCompanyStore = defineStore("company", {
                 console.error(error);
               }
         },
+        async fetchAllCompanies(){
+            useLoaderStore().showLoader({name:"wait_company",visibility:false});
+             try{
+                await axios.get('/get_all_companies',{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+                  this.allCompanies = response.data.data;
+                  useLoaderStore().hideLoader("wait_company");
+                });
+              } catch (error){
+                console.error(error);
+              }
+        },
         async fetchCompanyByName(name){
             useLoaderStore().showLoader({name:"wait_company",visibility:false});
              try{
@@ -74,7 +89,19 @@ export const useCompanyStore = defineStore("company", {
                 });
               } catch (error){
                 if(error.response.status==404){
-                    console.log("not found");
+                    this.router.push({name:"not-found"});
+                }
+              }
+        },
+        async fetchTwoCompanies(name1,name2){
+            useLoaderStore().showLoader({name:"wait_company",visibility:false});
+             try{
+                await axios.get('get_two_companies/'+name1+'/'+name2).then(response => {
+                  this.selectedTwoCompanies = response.data.data;
+                  useLoaderStore().hideLoader("wait_company");
+                });
+              } catch (error){
+                if(error.response.status==404){
                     this.router.push({name:"not-found"});
                 }
               }
@@ -95,12 +122,51 @@ export const useCompanyStore = defineStore("company", {
             try{
                 await axios.post('delete_company/'+id,null,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
                     useAlertStore().setAlert("alert-success","Company deleted successfully");
-                    this.fetchMyCompanies();
-                    this.companies =null;
+                    this.fetchAllCompanies();
+                    this.companies =[];
                     useLoaderStore().hideLoader("delete_company");
                 });
             }catch(error){
                 useLoaderStore().hideLoader("delete_company");
+                if(error.response.status!=500){
+                    useAlertStore().setAlert("alert-danger",error.response.data.message);
+                }
+                else{
+                    useAlertStore().setAlert("alert-danger","Something went wrong");
+                }
+            }
+        },
+        async fullDeleteCompany(id){
+            useLoaderStore().showLoader({name:"activate_company",visibility:true});
+            try{
+                await axios.delete('companies/'+id,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+                    useAlertStore().setAlert("alert-success","Company  definitely deleted  successfully");
+                    this.fetchAllCompanies();
+                    this.companies =[];
+                    useLoaderStore().hideLoader("activate_company");
+                });
+            }catch(error){
+                useLoaderStore().hideLoader("activate_company");
+                if(error.response.status!=500){
+                    useAlertStore().setAlert("alert-danger",error.response.data.message);
+                }
+                else{
+                    useAlertStore().setAlert("alert-danger","Something went wrong");
+                }
+            }
+        },
+        async activateCompany(id){
+            useLoaderStore().showLoader({name:"activate_company",visibility:false});
+            try{
+                await axios.post('restore_company/'+id,null,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+                    useAlertStore().setAlert("alert-success","Company restored successfully");
+                    this.companies =[];
+                    this.allCompanies = [];
+                    this.fetchAllCompanies();
+                    useLoaderStore().hideLoader("activate_company");
+                });
+            }catch(error){
+                useLoaderStore().hideLoader("activate_company");
                 if(error.response.status!=500){
                     useAlertStore().setAlert("alert-danger",error.response.data.message);
                 }

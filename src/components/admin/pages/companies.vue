@@ -1,30 +1,81 @@
 <script setup>
 import { Country}  from 'country-state-city';
 import { ref, onBeforeMount,computed } from "vue";
-import { useCompanyStore } from "../../../../stores/company";
-import Loader from "../../../composants/loader.vue";
+import { useCompanyStore } from "../../../stores/company";
+import Loader from "../../composants/loader.vue";
+import Alert from "../../composants/alert.vue";
 import {useRouter} from 'vue-router'
+import Swal from 'sweetalert2';
 const router = useRouter();
 const selectedCompany = ref(null);
+const typeSelected = ref('');
+const companies = computed(()=>{
+  if(typeSelected.value!=''){
+    return companyStore.getAllCompanies.filter(company=>company.deleted==typeSelected.value);
+  }else{
+    return companyStore.getAllCompanies
+  }
+});
+
 const companyStore = useCompanyStore();
-onBeforeMount(() => {
-  if(!companyStore.getCompanies.length!=0){
-    companyStore.fetchCompanies();
+onBeforeMount(async() => {
+  if(!companyStore.getAllCompanies.length!=0){
+   await companyStore.fetchAllCompanies();
   }
 });
 const current_page = ref(1);
 const handle_page = (page)=>{
-  if(page < 1 || page > Math.ceil(companyStore.getCompanies.length/7)) return;
+  if(page < 1 || page > Math.ceil(companies.value.length/7)) return;
   current_page.value = page;
 }
 const items = computed(()=>{
-  return companyStore.getCompanies.slice((current_page.value-1)*7,current_page.value*7);
+  return companies.value.slice((current_page.value-1)*7,current_page.value*7);
 });
 
 const selectedCompanyLink = (company)=>{
-  
  const slug = company.name.replace(/\s+/g, '-');
   router.push({name:'company',params:{name:slug}});
+}
+// const handle_search = ()=>{
+//   if(typeSelected.value!=''){
+//     companies.value = companyStore.getAllCompanies.filter(company=>company.name.toLowerCase().includes(search.value.toLowerCase()) && company.deleted==typeSelected.value);
+//   }else{
+//     companies.value = companyStore.getAllCompanies.filter(company=>company.name.toLowerCase().includes(search.value.toLowerCase()));
+//   }
+//   current_page.value = 1;
+// }
+
+// activate company  --------------------------------------
+
+const activateCompany = (id)=>{
+  Swal.fire({
+  title: 'Are you sure?',
+  text: "You want to restore this company!",
+  icon: 'success',
+  showCancelButton: true,
+  confirmButtonColor: 'green',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Yes'
+}).then((result) => {
+  if (result.isConfirmed) {
+    companyStore.activateCompany(id);
+  }
+}) 
+}
+const deleteCompany = (id)=>{
+  Swal.fire({
+  title: 'Are you sure?',
+  text: "You won't be able to revert this!",
+  icon: 'warning',
+  showCancelButton: true,
+  confirmButtonColor: '#3085d6',
+  cancelButtonColor: '#d33',
+  confirmButtonText: 'Yes'
+}).then((result) => {
+  if (result.isConfirmed) {
+    companyStore.fullDeleteCompany(id);
+  }
+})
 }
 </script>
 
@@ -32,18 +83,35 @@ const selectedCompanyLink = (company)=>{
 <div class="card mt-2" style="min-height: 80vh;">
 <div class="card-body  px-md-5">
 <div class=" table-responsive mt-2">
+    <Alert></Alert>
     <Loader :loaderName="'wait_company'"></Loader>
+    <Loader :loaderName="'activate_company'"></Loader>
+    <h5 class="text-primary">Search</h5>
+        <div class="d-flex" role="search">
+       
+        <select class="form-select " aria-label="Default select example" v-model="typeSelected" style="width:40%">
+          <option selected value="">--- All ---</option>
+          <option value="0">Active companies</option>
+          <option value="1">archived companies</option>
+        </select>
+      </div>
+      <br>
     <h3 v-if="items.length==0" class="text-center">No companies Available</h3>
+    
+
     <table v-else class="table align-middle mb-0 bg-white" style="border: 1px solid blue;" >
   <thead class="bg-light">
     <tr>
       <th>company</th>
+      <th>Manager</th>
       <th>Location</th>
       <th>Employees</th>
       <th>Reviews</th>
       <th>Stars</th>
+      
       <th>Revenu USD</th>
       <th>Link</th>
+      <th>action</th>
     </tr>
   </thead>
   <tbody>
@@ -64,6 +132,9 @@ const selectedCompanyLink = (company)=>{
         </div>
       </td>
       <td>
+        {{ company.manager.first_name }} {{ company.manager.last_name }}
+      </td>
+      <td>
         <p class="fw-normal mb-1">{{ Country.getCountryByCode(company.country_code).name }}</p>
         <p class="text-muted mb-0">{{ company.city }}</p>
       </td>
@@ -78,8 +149,16 @@ const selectedCompanyLink = (company)=>{
       </td>
       <td>{{ company.revenue }}</td>
         <td>
-        <button type="button"  class="btn  btn-outline-primary btn-sm btn-rounded" @click="selectedCompanyLink(company)">
+        <button type="button" v-if="!company.deleted"  class="btn  btn-outline-primary btn-sm btn-rounded" @click="selectedCompanyLink(company)">
           Show
+        </button>
+        <button type="button" v-else class="btn  btn-outline-success btn-sm btn-rounded" @click="activateCompany(company.id)">
+          Activate
+        </button>
+      </td>
+      <td>
+        <button type="button" class="btn  btn-outline-danger btn-sm btn-rounded" @click="deleteCompany(company.id)">
+          Delete
         </button>
       </td>
     </tr>

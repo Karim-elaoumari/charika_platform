@@ -43,6 +43,7 @@ const selectedReview = (review)=>{
 </script>
 <template>
   <Loader :loaderName="'main'"></Loader>
+  <Loader :loaderName="'wait_review'"></Loader>
 <main id="main">
 <section class="breadcrumbs mt-0" style="height: 60px;" >
   <div class="container">

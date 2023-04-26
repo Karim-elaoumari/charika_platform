@@ -10,12 +10,14 @@ export const useReviewStore = defineStore("review",{
         reviews:[],
         selectedReveiw : null,
         myRelatedReviews : [],
+        allReviews : [],
         router : useRouter()
     }),
     getters:{
         getReviews: (state) => { return state.reviews},
         getReview : (state) => { return state.selectedReveiw},
-        getMyRelatedReviews : (state) => { return state.myRelatedReviews}
+        getMyRelatedReviews : (state) => { return state.myRelatedReviews},
+        getAllReviews : (state) => { return state.allReviews}
     },
     actions:{
         async addReview(info,name){
@@ -46,24 +48,7 @@ export const useReviewStore = defineStore("review",{
               }
             }
         },
-        async updateReview(id,name,logo,website,country_code,city,address,industry,foundation_year,employees,revenue,description,mission){
-            useLoaderStore().showLoader({name:"update_company",visibility:true});
-            try{
-                await axios.put('/companies/'+id, {name,logo,website,country_code,city,address,industry,foundation_year,employees,revenue,description,mission},{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response =>{ 
-                    useAlertStore().setAlert("alert-success","Company updated successfully");
-                    this.companies = response.data.data;
-                    useLoaderStore().hideLoader("update_company");
-                });
-            }catch(error){
-                useLoaderStore().hideLoader("update_company");
-              if(error.response.status!=500){
-                    useAlertStore().setAlert("alert-danger",error.response.data.message);
-              }
-              else{
-                  useAlertStore().setAlert("alert-danger","Something went wrong");
-              }
-            }
-        },
+       
         async fetchReviews(){
             useLoaderStore().showLoader({name:"wait_review",visibility:false});
              try{
@@ -72,6 +57,17 @@ export const useReviewStore = defineStore("review",{
                   useLoaderStore().hideLoader("wait_review");
                 });
               }catch (error){
+                console.error(error);
+              }
+        },
+        async fetchAllReviews(){
+            useLoaderStore().showLoader({name:"wait_review",visibility:false});
+             try{
+                await axios.get('/get_all_reviews',{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+                  this.allReviews = response.data.data;
+                  useLoaderStore().hideLoader("wait_review");
+                });
+              } catch (error){
                 console.error(error);
               }
         },
@@ -119,6 +115,44 @@ export const useReviewStore = defineStore("review",{
               }
           }
       },
+      async fullDeleteReview(id){
+        useLoaderStore().showLoader({name:"wait_review",visibility:true});
+        try{
+            await axios.delete('reviews/'+id,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+                useAlertStore().setAlert("alert-success","Review  definitely deleted  successfully");
+                this.fetchAllReviews();
+                this.reviews =[];
+                useLoaderStore().hideLoader("wait_review");
+            });
+        }catch(error){
+            useLoaderStore().hideLoader("wait_review");
+            if(error.response.status!=500){
+                useAlertStore().setAlert("alert-danger",error.response.data.message);
+            }
+            else{
+                useAlertStore().setAlert("alert-danger","Something went wrong");
+            }
+        }
+    },
+    async activateReview(id){
+        useLoaderStore().showLoader({name:"wait_review",visibility:false});
+        try{
+            await axios.post('restore_review/'+id,null,{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+                useAlertStore().setAlert("alert-success","Review restored successfully");
+                this.fetchAllReviews();
+                this.reviews =[];
+                useLoaderStore().hideLoader("wait_review");
+            });
+        }catch(error){
+            useLoaderStore().hideLoader("wait_review");
+            if(error.response.status!=500){
+                useAlertStore().setAlert("alert-danger",error.response.data.message);
+            }
+            else{
+                useAlertStore().setAlert("alert-danger","Something went wrong");
+            }
+        }
+    },
 
       // comment section -----------------
       async addComment(info){
