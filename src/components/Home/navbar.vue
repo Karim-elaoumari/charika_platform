@@ -43,8 +43,21 @@ const showDropDown = ref(false);
           <router-link to="/companies" class="nav-link">Companies</router-link>
         </li>
         <li class="nav-item">
+          <router-link to="/comp_vs_comp" class="nav-link">Comp vs Comp</router-link>
+        </li>
+        <li class="nav-item">
           <router-link to="/reviews" class="nav-link">Reviews</router-link>
         </li>
+        <div  v-if="useAuthStore().getUser">
+          <li class="nav-item" v-if="useAuthStore().getUser.role=='manager'">
+          <router-link to="/manager" class="nav-link">Dashboard</router-link>
+        </li>
+        <li class="nav-item" v-if="useAuthStore().getUser.role=='admin'">
+          <router-link to="/admin" class="nav-link">Dashboard</router-link>
+        </li>
+
+        </div>
+        
         <!-- <li class="nav-item dropdown" v-if="useAuthStore().getUser">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Profile

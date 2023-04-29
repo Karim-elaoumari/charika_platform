@@ -46,9 +46,9 @@ onBeforeMount(async ()=>{
 <div class="d-flex bg-light " :class="wrapper" id="wrapper">
  <div class="myBackground2 " id="sidebar-wrapper">
             <div class="sidebar-heading text-center d-flex flex-column py-4 fs-5 border-bottom mt-5">
-                <button type="submit" name="logout" class="btn btn-lg btn-block btn-light my-3 mycolor button1 fs-6 w-100">Log out</button>
+                <button  name="logout" class="btn btn-lg btn-block btn-light my-3 mycolor button1 fs-6 w-100">Welcome</button>
 </div>
-                <a  @click="currentComponent = Dashboard" class="list-group-item list" style="cursor: pointer;"><i class="bi bi-speedometer2 fs-4 me-2 "></i>Dashboard</a>
+                <a  @click="currentComponent = Dashboard" class="list-group-item list " style="cursor: pointer;margin-left: 10px;"><i class="bi bi-speedometer2 fs-4 me-3"></i>Dashboard</a>
                 <li class="nav-item dropdown" style="list-style: none;margin-left: 10px;">
                         <a class="list-group-item list" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                           <i class="bi bi-building fs-4 me-2 "></i> Companies

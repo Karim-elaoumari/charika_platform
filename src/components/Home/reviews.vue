@@ -78,27 +78,21 @@ const selectedReview = (review)=>{
         </select>
         <button class=" ms-2 btn btn-outline-primary" @click="handle_search"><i class="bi bi-search"></i></button>
         </div><br>
-
-        <article class="entry mb-3" v-for="review in items" @click="selectedReview(review)" style="cursor: pointer;">
+        <h3 v-if="items.length==0" class="text-center">No reviews Available</h3>
+        <article class="entry mb-3" v-else  v-for="review in items" @click="selectedReview(review)" style="cursor: pointer;">
             <div id="comment-3" class="comment">
             <div class="d-flex">
               <div class="comment-img"><img :src="review.reviewer.photo!=null?review.reviewer.photo:'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png'" style="width: 80px;border-radius: 50%;height: 80px;" alt=""><br>
                 <img :src="review.company_logo" style="width: 40px;height:40px;border-radius: 50%;border: 1px black solid;margin-left: 48px;margin-top: -56px;" alt="">
               </div>
-             
               <div style="padding-left: 7px;">
                 <h5 class="ms-4 "><a  style="text-decoration: none;color: #4154f1;">{{ review.reviewer.first_name+" "+review.reviewer.last_name}} -> {{ review.company_name }}</a> </h5>
-             
-               
                 <p>
                   {{ review.content.slice(0, 200) + '...' }}
                 </p>
-
-                
               </div>
             </div>
           </div>
-
           <div class="entry-meta mt-3">
             <ul>
               <li class="d-flex align-items-center"><i class="bi bi-clock"></i> <a href=""><time>{{ review.date+" "+review.time }}</time></a></li>
@@ -112,12 +106,7 @@ const selectedReview = (review)=>{
                 <i class="bi bi-star-fill " :style=" {color: review.stars>4 ? '#fbc634' : ''}" ></i>
             </div>
           </div>
-
-          
-
         </article>
-        
-
         <ul class="pagination  justify-content-center mt-3" style="cursor: pointer;">
             <li class="page-item">
               <a class="page-link" href="#" aria-label="Previous" @click="handle_page(current_page-1)">
@@ -134,12 +123,8 @@ const selectedReview = (review)=>{
             </li>
         </ul>
       </div>
-
       <div class="col-lg-4">
-
         <div class="sidebar">
-         
-
           <h3 class="sidebar-title">ADS</h3>
               <div class="sidebar-item categories" style="padding: 0;">
                 

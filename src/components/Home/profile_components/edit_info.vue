@@ -5,7 +5,7 @@ import { useAlertStore } from "../../../stores/alert";
 import { useJobStore} from "../../../stores/job";
 import Alert from "../../composants/alert.vue";
 import Loader from "../../composants/loader.vue";
-const imageUrl = ref('https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png');
+const imageUrl = ref(useAuthStore().getUser.photo);
 onBeforeMount(async()=>{
   if(useJobStore().getJobs.length == 0){
     await useJobStore().fetchJobs();
@@ -21,9 +21,6 @@ const updateImage = (event) =>{
       const file = event.target.files[0];
       imageUrl.value = URL.createObjectURL(file);
       form.value.photo = file;
-}
-if(useAuthStore().getUser.photo!=null){
-  imageUrl.value = useAuthStore().getUser.photo;
 }
 const handleInfo = ()=> {
   if(form.value.first_name == '' || form.value.last_name == '' || form.value.speciality == '' || form.value.job_id == ''){
@@ -58,7 +55,7 @@ const switchSelect = (event)=>{
                              <img :src="imageUrl" style="width: 200px;border-radius: 50%;height:200px;" alt="image_profile">
                           </div>
                           <div class="mb-3">
-                            <input type="file"  class="form-control" v-on:change="updateImage">
+                            <input type="file"  class="form-control" v-on:change="updateImage" style="cursor: pointer;">
                           </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-12" style="height:300px">

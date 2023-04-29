@@ -23,11 +23,11 @@ const currentComponent = ref(Edit_info);
                 <h2 class="text-center mt-4">Profile</h2>
                 <div class="card-body text-center">
                   <div class="mt-3 mb-4">
-                    <img :src="useAuthStore().getUser.photo==null?'https://www.citypng.com/public/uploads/small/11639786938ezifytzfr8tbs8nzjsjdc1z0aqtrhyhq1zkujoyerqksff9tsl1f7vg9k1ujbojemibzdoayolcjrzbhp4euwhqjtyfa00tk9okr.png':useAuthStore().getUser.photo"
+                    <img :src="useAuthStore().getUser.photo"
                       class="rounded-circle img-fluid" style="width: 100px;height: 100px;" />
                   </div>
                   <h4 class="mb-2" style=" color: #012970;">{{ useAuthStore().getUser.first_name+"  "+useAuthStore().getUser.last_name }}</h4>
-                  <p class="text-muted mb-4">{{ useAuthStore().getUser.email }}<span class="mx-2">|</span><a href="">User</a></p>
+                  <p class="text-muted mb-4">{{ useAuthStore().getUser.email }}<span class="mx-2">|</span><a href="">{{ useAuthStore().getUser.role }}</a></p>
                   <div class="d-flex justify-content-around text-center mt-5 mb-2">
                     <div class="mt-5">
                       <p class="mb-2 h5">{{ useAuthStore().getUser.speciality }}</p>

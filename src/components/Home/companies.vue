@@ -69,8 +69,8 @@ const selectedCompany = (company)=>{
         </select>
         <button class=" ms-2 btn btn-outline-primary" @click="handle_search"><i class="bi bi-search"></i></button>
         </div><br>
-        
-        <article class="entry mt-3" v-for="company in items" style="cursor: pointer;" @click="selectedCompany(company)" id="companies">
+        <h3 v-if="items.length==0" class="text-center">No companies Available</h3>
+        <article v-else class="entry mt-3" v-for="company in items" style="cursor: pointer;" @click="selectedCompany(company)" id="companies">
             <div id="comment-3" class="comment">
             <div class="d-flex">
               <div class="comment-img"><img :src="company.logo" style="max-width: 100px;height: 90px;" alt=""></div>

@@ -27,7 +27,7 @@ export const useCompanyStore = defineStore("company", {
                 await axios.post('/companies', {name,logo,website,country_code,city,address,industry,foundation_year,employees,revenue,description,mission},{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response =>{ 
                     useAlertStore().setAlert("alert-success","Company created successfully");
                     this.companies = response.data.data;
-                    console.log(this.companies);
+                    this.myCompanies = [];
                     useLoaderStore().hideLoader("new_company");
                 });
             } catch (error){
@@ -46,6 +46,8 @@ export const useCompanyStore = defineStore("company", {
                 await axios.put('/companies/'+id, {name,logo,website,country_code,city,address,industry,foundation_year,employees,revenue,description,mission},{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response =>{ 
                     useAlertStore().setAlert("alert-success","Company updated successfully");
                     this.companies = response.data.data;
+                    this.myCompanies = [];
+                    this.fetchMyCompanies();
                     useLoaderStore().hideLoader("update_company");
                 });
             }catch(error){

@@ -14,10 +14,10 @@ const alertStore = useAlertStore();
 const IndustryStore = useIndustyStore();
 const companyStore = useCompanyStore();
 onBeforeMount(async ()=>{
-    if(!companyStore.getMyCompanies.length){
+    if(companyStore.getMyCompanies.length==0){
         await companyStore.fetchMyCompanies();
     }
-    if(!IndustryStore.industries.length){
+    if(IndustryStore.industries.length==0){
         await IndustryStore.fetchIndustries();
     }
 });
@@ -96,8 +96,8 @@ const handle_company = ()=>{
         if(form_company.revenue==''){
             form_company.revenue=100;
         }
-        console.log(form_company.value.id);
         useCompanyStore().updateCompany(form_company.value.id,form_company.value.name,form_company.value.logo_url,form_company.value.website,form_company.value.country,form_company.value.city,form_company.value.address,form_company.value.industry,form_company.value.foundation_year,form_company.value.employees,form_company.value.revenue,form_company.value.description,form_company.value.mission);
+        document.getElementById('update_button').click();
     }
 }
 
@@ -221,7 +221,7 @@ const selectedCompanyLink = (company)=>{
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="exampleModalLabel">Company information</h1>
         <Alert></Alert>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="update_button"></button>
       </div>
       <div class="modal-body blog entries">
         <Loader :loaderName="'update_company'"></Loader>
@@ -262,7 +262,7 @@ const selectedCompanyLink = (company)=>{
                             <option value="">--Select--</option>
                             <option  :value="city.name" v-for="city in City.getCitiesOfCountry(form_company.country)" :selected="city.name==form_company.city">{{ city.name }}</option>
                         </select>
-                        <label for="job">City</label>
+                        <label for="job">City</label> 
                 </div>
 
         
@@ -319,7 +319,7 @@ const selectedCompanyLink = (company)=>{
             <label class="form-label" for="form6Example7">Mission</label>
         </div>
         
-        <button type="submit" class="btn btn-primary btn-block mb-4">update</button>
+        <button type="submit" class="btn btn-primary btn-block mb-4" >update</button>
         </form>
        
       </div>

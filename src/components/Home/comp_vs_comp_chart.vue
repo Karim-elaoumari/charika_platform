@@ -3,12 +3,7 @@ import Footer from "./footer.vue";
 import { useCompanyStore } from "../../stores/company";
 import { ref, onBeforeMount, computed } from "vue";
 import Loader from "../composants/loader.vue";
-//  ---------------------------------------
-
-// ----------------------------------------
 import {useRouter} from 'vue-router'
-
-
 const companyStore = useCompanyStore();
 const router = useRouter();
 
@@ -24,7 +19,10 @@ onBeforeMount(async () =>{
   }
   wait.value = true;
 });
-
+const selectedCompany = (company)=>{
+  const slug = company.name.replace(/\s+/g, '-');
+  router.push({name:'company',params:{name:slug}});
+}
 </script>
 <template>
   <Loader :loaderName="'main'"></Loader>
@@ -47,7 +45,7 @@ onBeforeMount(async () =>{
              
               <div class="card-header py-3">
                 <img :src="companies[0].logo" style="width: 60px;height: 60px;border-radius:10%;" alt="" class="mb-2 ">
-                  <h6 class="m-0 font-weight-bold text-primary">{{ companies[0].name }}</h6>
+                  <h6 class="m-0 font-weight-bold text-primary" @click="selectedCompany(companies[0])" style="cursor: pointer;">{{ companies[0].name }}</h6>
                 </div>
                 <div class="card-body">
                   <h4 class="small font-weight-bold"><span class="ms-4">Rating  </span> 
@@ -78,7 +76,7 @@ onBeforeMount(async () =>{
                   <div class="progress mb-4" style="width: 30%" v-else>
                     <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
                   </div>
-                  <h4 class="small font-weight-bold">Revenue <span class="float-right">{{ companies[0].revenue }}</span></h4>
+                  <h4 class="small font-weight-bold">$ Revenue <span class="float-right">{{ companies[0].revenue }} </span></h4>
                   <div class="progress mb-4" style="width: 15%" v-if="companies[0].revenue<companies[1].revenue">
                     <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
@@ -92,10 +90,10 @@ onBeforeMount(async () =>{
             <div class="col-5" >
               <div class="card-header py-3">
                 <img :src="companies[1].logo" style="width: 60px;height: 60px;border-radius:10%;" alt="" class="mb-2 ">
-                  <h6 class="m-0 font-weight-bold text-primary">{{ companies[1].name }}</h6>
+                  <h6 class="m-0 font-weight-bold text-primary" @click="selectedCompany(companies[1])" style="cursor: pointer;">{{ companies[1].name }}</h6>
                 </div>
                 <div class="card-body">
-                  <h4 class="small font-weight-bold"><span class="ms-4">Rating  </span> 
+                  <h4 class="small font-weight-bold"><span class="me-4">Rating  </span> 
                 <i class="bi bi-star-fill fs-6" :style=" {color: companies[1].stars>0 ? '#fbc634' : ''}" ></i>
                 <i class="bi bi-star-fill fs-6" :style=" {color: companies[1].stars>1 ? '#fbc634' : ''}" ></i>
                 <i class="bi bi-star-fill fs-6" :style=" {color: companies[1].stars>2 ? '#fbc634' : ''}" ></i>
@@ -122,7 +120,7 @@ onBeforeMount(async () =>{
                   <div class="progress mb-4" style="width: 30%" v-else>
                     <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
                   </div>
-                  <h4 class="small font-weight-bold">Revenue <span class="float-right">{{ companies[1].revenue }}</span></h4>
+                  <h4 class="small font-weight-bold">Revenue <span class="float-right">{{ companies[1].revenue }} $</span></h4>
                   <div class="progress mb-4" style="width: 15%" v-if="companies[0].revenue>companies[1].revenue">
                     <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
                   </div>

@@ -8,7 +8,7 @@ const router = useRouter();
 const selectedCompany = ref(null);
 const companyStore = useCompanyStore();
 onBeforeMount(() => {
-  if(!companyStore.getCompanies.length!=0){
+  if(companyStore.getCompanies.length==0){
     companyStore.fetchCompanies();
   }
 });

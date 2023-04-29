@@ -8,11 +8,13 @@ export const useAuthStore = defineStore("auth", {
     state:() => ({
       user: null,
       role: null,
+      users: [],
       router : useRouter()
     }),
     getters: {
       getUser: (state) => state.user,
       getRole: (state) => state.role,
+      getUsers: (state) => state.users
     },
     actions: {
         async login(email, password){
@@ -248,6 +250,66 @@ export const useAuthStore = defineStore("auth", {
               useAlertStore().setAlert("alert-danger","Something went wrong");
           }
       }
-  }
+  },
+  async fetchUsers(){
+    useLoaderStore().showLoader({name:"wait_users",visibility:false});
+     try{
+        await axios.get('/users',{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+          this.users = response.data.data;
+          useLoaderStore().hideLoader("wait_users");
+        });
+      } catch (error){
+        console.error(error);
+      }
+},
+  async switchUserToManager(manager_id){
+    useLoaderStore().showLoader({name:"switch_role",visibility:false});
+    try{
+    
+        await axios.put('switch_user_to_manager',{manager_id},{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+            useAlertStore().setAlert("alert-success","User Role changed to Manager successfully");
+            this.users =[];
+            this.fetchUsers();
+            useLoaderStore().hideLoader("switch_role");
+        });
+    }catch(error){
+        useLoaderStore().hideLoader("switch_role");
+        if(error.response.status!=500){
+            useAlertStore().setAlert("alert-danger",error.response.data.message);
+        }
+        else{
+            useAlertStore().setAlert("alert-danger","Something went wrong");
+        }
+    }
+   },
+   async switchManagerToUser(manager_id,second_manager_id){
+    useLoaderStore().showLoader({name:"switch_role",visibility:false});
+    try{
+      if(!second_manager_id){
+        console.log("here");
+        await axios.put('switch_manager_to_user_without_companies/',{manager_id},{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+          useAlertStore().setAlert("alert-success","Manager Role changed to User successfully");
+          this.users =[];
+          this.fetchUsers();
+          useLoaderStore().hideLoader("switch_role");
+      });
+      }else{
+        await axios.put('switch_manager_to_user/',{manager_id,second_manager_id},{headers:{ 'Authorization': `Bearer ${Cookies.get('token')}`}}).then(response => {
+            useAlertStore().setAlert("alert-success","Manager Role changed to User successfully");
+            this.users =[];
+            this.fetchUsers();
+            useLoaderStore().hideLoader("switch_role");
+        });
+      }
+    }catch(error){
+        useLoaderStore().hideLoader("switch_role");
+        if(error.response.status!=500){
+            useAlertStore().setAlert("alert-danger",error.response.data.message);
+        }
+        else{
+            useAlertStore().setAlert("alert-danger","Something went wrong");
+        }
+    }
+},
     }
 })

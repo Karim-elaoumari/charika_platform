@@ -6,6 +6,7 @@ import { useAuthStore } from "../../stores/auth";
 import Dashboard  from "./pages/dashboard.vue";
 import companies from "./pages/companies.vue";
 import reviews from "./pages/reviews.vue";
+import Users from "./pages/users.vue";
 const currentComponent = ref(Dashboard);
 const wrapper = ref("");
 const wait = computed(()=>{
@@ -43,11 +44,12 @@ onBeforeMount(async ()=>{
 <div class="d-flex bg-light " :class="wrapper" id="wrapper">
  <div class="myBackground2 " id="sidebar-wrapper">
             <div class="sidebar-heading text-center d-flex flex-column py-4 fs-5 border-bottom mt-5">
-                <button type="submit" name="logout" class="btn btn-lg btn-block btn-light my-3 mycolor button1 fs-6 w-100">Log out</button>
+              <button  name="logout" class="btn btn-lg btn-block btn-light my-3 mycolor button1 fs-6 w-100">Welcome</button>
 </div>
                 <a  @click="currentComponent = Dashboard" class="list-group-item list" style="cursor: pointer;"><i class="bi bi-speedometer2 fs-4 me-2 "></i>Dashboard</a>
                 <a  @click="currentComponent = companies" class="list-group-item list" style="cursor: pointer;"><i class="bi bi-building fs-4 me-2 "></i>Companies</a>
                 <a  @click="currentComponent = reviews" class="list-group-item list" style="cursor: pointer;"><i class="bi bi-chat-left-text fs-4 me-2 "></i>Reviews</a>
+                <a  @click="currentComponent = Users" class="list-group-item list" style="cursor: pointer;"><i class="bi bi-people fs-4 me-2 "></i>Manage Users</a>
                
                 
  </div>

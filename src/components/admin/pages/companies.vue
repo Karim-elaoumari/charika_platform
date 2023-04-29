@@ -7,7 +7,6 @@ import Alert from "../../composants/alert.vue";
 import {useRouter} from 'vue-router'
 import Swal from 'sweetalert2';
 const router = useRouter();
-const selectedCompany = ref(null);
 const typeSelected = ref('');
 const companies = computed(()=>{
   if(typeSelected.value!=''){
@@ -36,17 +35,6 @@ const selectedCompanyLink = (company)=>{
  const slug = company.name.replace(/\s+/g, '-');
   router.push({name:'company',params:{name:slug}});
 }
-// const handle_search = ()=>{
-//   if(typeSelected.value!=''){
-//     companies.value = companyStore.getAllCompanies.filter(company=>company.name.toLowerCase().includes(search.value.toLowerCase()) && company.deleted==typeSelected.value);
-//   }else{
-//     companies.value = companyStore.getAllCompanies.filter(company=>company.name.toLowerCase().includes(search.value.toLowerCase()));
-//   }
-//   current_page.value = 1;
-// }
-
-// activate company  --------------------------------------
-
 const activateCompany = (id)=>{
   Swal.fire({
   title: 'Are you sure?',
